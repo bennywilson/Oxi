@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{75C822E3-49D1-A346-0151-8AA6DA27E99F}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Oxi",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
