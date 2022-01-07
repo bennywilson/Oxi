@@ -15,9 +15,9 @@
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 //////////////////////////////////////////////////////////////////////////
-// AOxiCharacter
+// AOxiFirstPersonCharacter
 
-AOxiCharacter::AOxiCharacter()
+AOxiFirstPersonCharacter::AOxiFirstPersonCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -47,7 +47,7 @@ AOxiCharacter::AOxiCharacter()
 	PlayerState = OxiPlayerState::Normal;
 }
 
-void AOxiCharacter::BeginPlay()
+void AOxiFirstPersonCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -74,14 +74,14 @@ void AOxiCharacter::BeginPlay()
 	OnCharacterDeathEventHandle = UCombatManager::RegisterEventListener(this, FName("OnCharacterDeathEvent"));
 }
 
-void AOxiCharacter::BeginDestroy()
+void AOxiFirstPersonCharacter::BeginDestroy()
 {
 	Super::BeginDestroy();
 
 	UCombatManager::UnregisterEventListener(OnCharacterDeathEventHandle);
 }
 
-void AOxiCharacter::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction)
+void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
@@ -111,7 +111,7 @@ void AOxiCharacter::TickActor(float DeltaTime, enum ELevelTick TickType, FActorT
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void AOxiCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
@@ -121,28 +121,28 @@ void AOxiCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AOxiCharacter::OnFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AOxiFirstPersonCharacter::OnFire);
 
 
 	// Bind movement events
-	PlayerInputComponent->BindAxis("MoveForward", this, &AOxiCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AOxiCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AOxiFirstPersonCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AOxiFirstPersonCharacter::MoveRight);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AOxiCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("TurnRate", this, &AOxiFirstPersonCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiFirstPersonCharacter::LookUpAtRate);
 }
 
-void AOxiCharacter::OnFire()
+void AOxiFirstPersonCharacter::OnFire()
 {
 	StartFireWeapon(FirstPersonCameraComponent);
 }
 
-void AOxiCharacter::MoveForward(float Value)
+void AOxiFirstPersonCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
 	{
@@ -150,7 +150,7 @@ void AOxiCharacter::MoveForward(float Value)
 	}
 }
 
-void AOxiCharacter::MoveRight(float Value)
+void AOxiFirstPersonCharacter::MoveRight(float Value)
 {
 	if (Value != 0.0f)
 	{
@@ -158,17 +158,17 @@ void AOxiCharacter::MoveRight(float Value)
 	}
 }
 
-void AOxiCharacter::TurnAtRate(float Rate)
+void AOxiFirstPersonCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AOxiCharacter::LookUpAtRate(float Rate)
+void AOxiFirstPersonCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-float AOxiCharacter::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+float AOxiFirstPersonCharacter::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
 	CurrentHealth -= DamageInfo.DamageAmount;
 	
@@ -190,7 +190,7 @@ float AOxiCharacter::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 	return 0.f;
 }
 
-void AOxiCharacter::OnCharacterDeathEvent(UOxiDamageComponent* Victim, UOxiDamageComponent* Killer)
+void AOxiFirstPersonCharacter::OnCharacterDeathEvent(UOxiDamageComponent* Victim, UOxiDamageComponent* Killer)
 {
 	if (EnemyKilledVO.Num() > 0)
 	{
@@ -205,7 +205,7 @@ void AOxiCharacter::OnCharacterDeathEvent(UOxiDamageComponent* Victim, UOxiDamag
 	}
 }
 
-void AOxiCharacter::ChangeOxiPlayerState(OxiPlayerState InPlayerState, FVector InteractionPos, bool bMovePlayer, FRotator InteractionRot, bool bRotatePlayer)
+void AOxiFirstPersonCharacter::ChangeOxiPlayerState(OxiPlayerState InPlayerState, FVector InteractionPos, bool bMovePlayer, FRotator InteractionRot, bool bRotatePlayer)
 {
 	PlayerState = InPlayerState;
 	ShouldMoveTowardsTarget = bMovePlayer;

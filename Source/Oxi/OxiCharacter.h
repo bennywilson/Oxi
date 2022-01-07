@@ -28,13 +28,20 @@ protected:
 	TMap<FName, UAnimSequence*> AnimSequenceMap;
 };
 
-UCLASS(config=Game)
+UCLASS()
 class AOxiCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+};
+
+UCLASS()
+class AOxiFirstPersonCharacter : public AOxiCharacter
+{
+	GENERATED_BODY()
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Mesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	class USkeletalMeshComponent* Mesh1P;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -53,7 +60,7 @@ protected:
 	TSubclassOf<AOxiWeapon> DefaultWeapon;
 
 public:
-	AOxiCharacter();
+	AOxiFirstPersonCharacter();
 
 protected:
 	virtual void BeginPlay() override;
@@ -62,10 +69,10 @@ protected:
 
 public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseTurnRate;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -99,7 +106,7 @@ public:
 	bool StartFireWeapon(const UCameraComponent* const CameraComp1P);
 
 private:
-	
+
 	UMaterialInstanceDynamic* HandsMaterial;
 	float CurrentHealth;
 
@@ -107,7 +114,7 @@ private:
 	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo);
 
 protected:
-	
+
 	void OnFire();
 
 	void MoveForward(float Val);
@@ -127,12 +134,11 @@ public:
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 private:
-	
+
 	UFUNCTION()
 	void OnCharacterDeathEvent(class UOxiDamageComponent* Victim, UOxiDamageComponent* Killer);
 
 	FDelegateHandle OnCharacterDeathEventHandle;
-
 
 	// Player State	
 	OxiPlayerState PlayerState;
@@ -146,4 +152,3 @@ private:
 	FRotator TargetRotation;
 	bool ShouldRotateTowardsTarget;
 };
-
