@@ -12,8 +12,7 @@ void UOxiDamageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<USceneComponent*> Children;
-	GetChildrenComponents(true, Children);
+	TArray<UActorComponent*> Children = GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass());
 
 	for (int iChild = 0; iChild < Children.Num(); iChild++)
 	{
