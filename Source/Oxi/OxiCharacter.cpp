@@ -14,6 +14,22 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
+void UOxiCharacterMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)
+{
+	Super::RequestDirectMove(MoveVelocity, bForceMaxSpeed);
+}
+
+AOxiCharacter::AOxiCharacter()
+{
+
+}
+
+AOxiCharacter::AOxiCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UOxiCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+{
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 // AOxiFirstPersonCharacter
 

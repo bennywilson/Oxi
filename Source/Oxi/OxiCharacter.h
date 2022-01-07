@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "OxiWeapon.h"
 #include "OxiDamageComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "OxiCharacter.generated.h"
 
 class UInputComponent;
@@ -29,10 +30,21 @@ protected:
 };
 
 UCLASS()
+class UOxiCharacterMovementComponent : public UCharacterMovementComponent
+{
+	GENERATED_BODY()
+
+	virtual void RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed);
+};
+
+UCLASS()
 class AOxiCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+public:
+	AOxiCharacter();
+	AOxiCharacter(const FObjectInitializer&);
 };
 
 UCLASS()
