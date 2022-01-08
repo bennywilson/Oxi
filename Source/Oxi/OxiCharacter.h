@@ -35,6 +35,9 @@ class UOxiCharacterMovementComponent : public UCharacterMovementComponent
 	GENERATED_BODY()
 
 	virtual void RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed);
+
+	UFUNCTION(BlueprintCallable, Category = "Oxi Character Movement")
+	FVector GetRequestedVelocity() const { return RequestedVelocity; }
 };
 
 UCLASS()
