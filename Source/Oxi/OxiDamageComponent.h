@@ -23,6 +23,12 @@ struct FOxiDamageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName HitBoneName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DamageXYImpulse;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DamageZImpulse;
 };
 
 

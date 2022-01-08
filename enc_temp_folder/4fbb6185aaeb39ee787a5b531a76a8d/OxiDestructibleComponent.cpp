@@ -142,8 +142,8 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 				{
 					FOxiDamageInfo NewDamageInfo = DamageInfo;
 					NewDamageInfo.DamageCauser = GetOwner();
-					NewDamageInfo.DamageXYImpulse = 3000;
-					NewDamageInfo.DamageZImpulse = 800;
+					NewDamageInfo.DamageXYImpulse = 700;
+					NewDamageInfo.DamageZImpulse = 100;
 
 					TInlineComponentArray<UOxiDamageComponent*> DamageComps;
 					CurOwner->GetComponents(DamageComps);

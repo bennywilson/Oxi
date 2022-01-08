@@ -34,9 +34,7 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 	GetChildrenComponents(true, AllChildren);
 
 	static float Scalar = 350.f;
-	FVector Impulse = (DamageInfo.DamageLocation - DamageInfo.DamageCauser->GetActorLocation());
-	Impulse.Z = 0;
-	Impulse = Impulse.GetSafeNormal() * DamageInfo.DamageXYImpulse + FVector::UpVector * DamageInfo.DamageZImpulse;
+	const FVector Impulse = (DamageInfo.DamageLocation - DamageInfo.DamageCauser->GetActorLocation()).GetSafeNormal() * DamageInfo.DamageXYImpulse + FVector::UpVector * DamageInfo.DamageZImpulse;
 
 	bool bAddedWound = false;
 

@@ -34,7 +34,7 @@ protected:
 	float Health;
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
-	float ExplosionSplashDamageRadius;
+		float ExplosionSplashDamageRadius;
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
 	float ExplosionSplashDamageAmount;
@@ -47,6 +47,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
 	float ExplosionXYImpulseMax;
+
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
+	float ExplosionZImpulseMin;
+
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
+	float ExplosionZImpulseMax;
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
 	float ExplosionAngularImpulseMin;
