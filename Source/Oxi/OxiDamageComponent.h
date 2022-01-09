@@ -7,10 +7,20 @@
 #include "TimerManager.h"
 #include "OxiDamageComponent.generated.h"
 
+UENUM(BlueprintType)
+enum EOxiDamageType
+{
+	Bullet = 0,
+	Explosion,
+};
+
 USTRUCT(BlueprintType)
 struct FOxiDamageInfo
 {
 	GENERATED_USTRUCT_BODY();
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EOxiDamageType> DamageType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageAmount;

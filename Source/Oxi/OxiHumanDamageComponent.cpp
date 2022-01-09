@@ -167,13 +167,17 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 		}
 
 		// Physics
-		SkelMesh->SetSimulatePhysics(true);
-		SkelMesh->SetAllBodiesPhysicsBlendWeight(1.f);
-		SkelMesh->AddImpulse(Impulse, DamageInfo.HitBoneName, true);
+		if (bRagdolling == false)
+	 	{
+			bRagdolling = true;
+			SkelMesh->SetSimulatePhysics(true);
+			SkelMesh->SetAllBodiesPhysicsBlendWeight(1.f);
+			SkelMesh->AddImpulse(Impulse, DamageInfo.HitBoneName, true);
 
-		SkelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+			SkelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
-		GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 3.0f, true, 2.0f);
+			GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 7.0f, true, 2.0f);
+		}		
 	}
 
 	return 0.f;

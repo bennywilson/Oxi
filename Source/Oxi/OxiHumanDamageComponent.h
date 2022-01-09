@@ -20,5 +20,7 @@ public:
 protected:
 
 	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) override;
+
+	bool bRagdolling = false;
 };
 
