@@ -176,7 +176,7 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 
 			SkelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
-			GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 5.0f, true, 5.0f);
+			GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 7.0f, true, 2.0f);
 		}		
 	}
 
