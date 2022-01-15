@@ -5,6 +5,9 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BillboardComponent.h"
 
+/**
+ * 
+ */
 AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
