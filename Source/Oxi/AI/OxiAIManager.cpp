@@ -7,15 +7,6 @@
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
 /**
- *	AI can ignore the AI command
- */
-bool AOxiAICharacter::IssueSquadCommand_Implementation(const OxiAICommand AICommand, const FOxiAICommandData&)
-{
-	CurrentAICommand = AICommand;
-	return true;
-}
-
-/**
  * 
  */
 UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
@@ -122,10 +113,91 @@ void AOxiSquad::Tick(float DeltaTime)
 				AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
 				if (FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
 				{
-					SquadState = EOxiSquadState::Attack;
+					TArray<AOxiCharacter*> EnemyList;
+					EnemyList.Add(Player);
+					EnterAttackState(EnemyList);
+					break;
 				}
 			}
 		}
+	}
+}
+
+/**
+ *
+ */
+void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
+{
+	check(EnemyList.Num() > 0);
+
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
+	SquadState = EOxiSquadState::Attack;
+
+	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
+	if (CoverList.Num() == 0)
+	{
+		FOxiAICommandData AICommandData;
+		AICommandData.AICommand = OxiAICommand::HoldPosition;
+		AICommandData.Target = EnemyList[0];
+
+		for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+		{
+			AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[i]);
+			if (SquadMember == nullptr)
+			{
+				continue;
+			}
+
+			SquadMember->IssueSquadCommand(AICommandData);
+		}
+	}
+
+	for (int iSquad = 0; iSquad < CurrentSquadMembers.Num(); iSquad++)
+	{
+		AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[iSquad]);
+		if (SquadMember == nullptr)
+		{
+			continue;
+		}
+
+		float ClosestCoverDist = FLT_MAX;
+		int ClosestCoverIdx = -1;
+		for (int iCover = 0; iCover < CoverList.Num(); iCover++)
+		{
+			AOxiCover* const CurrentCover = CoverList[iCover];
+			if (CurrentCover->GetNumUsers() > 0)
+			{
+				continue;
+			}
+
+			float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), EnemyList[0]->GetActorLocation());
+			if (CoverDist < ClosestCoverDist)
+			{
+				ClosestCoverIdx = iCover;
+				ClosestCoverDist = CoverDist;
+			}
+		}
+
+		// No suitable cover found.  Hold current position
+		if (ClosestCoverIdx == -1)
+		{
+			FOxiAICommandData AICommandData;
+			AICommandData.AICommand = OxiAICommand::HoldPosition;
+			AICommandData.Target = EnemyList[0];
+			AICommandData.Goal = nullptr;
+			SquadMember->IssueSquadCommand(AICommandData);
+			continue;
+		}
+
+		// Take Cover
+		FOxiAICommandData AICommandData;
+		AICommandData.AICommand = OxiAICommand::TakeCover;
+		AICommandData.Target = EnemyList[0];
+		AICommandData.Goal = CoverList[ClosestCoverIdx];
+
+		CoverList.RemoveAt(ClosestCoverIdx);
+
+		SquadMember->IssueSquadCommand(AICommandData);
 	}
 }
 

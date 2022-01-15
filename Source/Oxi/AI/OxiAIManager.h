@@ -19,7 +19,8 @@ enum class OxiAICommand : uint8
 	None,
 	TakeCover,
 	RushTarget,
-	FlankTarget
+	FlankTarget,
+	HoldPosition,
 };
 
 USTRUCT(BlueprintType)
@@ -27,7 +28,14 @@ struct FOxiAICommandData
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite)
+	OxiAICommand AICommand;
+
+	UPROPERTY(BlueprintReadWrite)
 	AActor* Target;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* Goal;
 };
 
 /**
@@ -40,8 +48,8 @@ class OXI_API AOxiAICharacter : public AOxiCharacter
 
 public:
 
-	UFUNCTION(BlueprintNativeEvent)
-	bool IssueSquadCommand(const OxiAICommand AICommand, const FOxiAICommandData& Payload);
+	UFUNCTION(BlueprintImplementableEvent)
+	bool IssueSquadCommand(const FOxiAICommandData& CommandData);
 
 private:
 	
@@ -81,6 +89,7 @@ public:
 private:
 
 	void SquadMemberKilledCB(AActor* const Victim, AActor* const Killer);
+	void EnterAttackState(TArray<AOxiCharacter*> EnemyList);
 
 protected:
 
@@ -116,6 +125,8 @@ public:
 	void UnregisterPlayer(AOxiFirstPersonCharacter* const Player);
 
 	const TArray<AOxiFirstPersonCharacter*> GetPlayerList() const { return PlayerList; }
+
+	TArray<AOxiCover*> GetCoverList() const { return CoverList; }
 
 private:
 

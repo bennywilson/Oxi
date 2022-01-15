@@ -52,7 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveUser(AOxiCharacter* const UserToRemove);
 
-	int NumberOfUsers() const { return CurrentUsers.Num(); }
+	int GetNumUsers() const { return CurrentUsers.Num(); }
 
 protected:
 
