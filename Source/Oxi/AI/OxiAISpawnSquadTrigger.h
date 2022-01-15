@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../OxiCharacter.h"
+#include "OxiCharacter.h"
 #include "GameFramework/PhysicsVolume.h"
-#include "AISpawnSquadTrigger.generated.h"
+#include "OxiAISpawnSquadTrigger.generated.h"
 
 UCLASS()
 class OXI_API AAISquadMemberSpawn : public AActor

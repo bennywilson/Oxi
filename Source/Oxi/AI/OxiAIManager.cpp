@@ -1,7 +1,8 @@
 // ELP 2022
 
-#include "../OxiHumanDamageComponent.h"
-#include "AIManager.h"
+#include "OxiAIManager.h"
+#include "OxiHumanDamageComponent.h"
+
 
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
@@ -77,7 +78,7 @@ int UOxiSquad::GetNumAliveSquadMembers() const
 /**
  * 
  */
-void UAISquadManager::RegisterSquad(UOxiSquad* const Squad)
+void UOxiAISquadManager::RegisterSquad(UOxiSquad* const Squad)
 {
 
 }
@@ -85,7 +86,7 @@ void UAISquadManager::RegisterSquad(UOxiSquad* const Squad)
 /**
  * 
  */
-void UAISquadManager::UnregisterSquad(UOxiSquad* const Squad)
+void UOxiAISquadManager::UnregisterSquad(UOxiSquad* const Squad)
 {
 
 }

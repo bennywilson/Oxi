@@ -1,8 +1,8 @@
 // ELP 2022
 
-#include "AIManager.h"
+#include "OxiAISpawnSquadTrigger.h"
+#include "OxiAIManager.h"
 #include "Components/BillboardComponent.h"
-#include "AISpawnSquadTrigger.h"
 
 AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -46,6 +46,9 @@ AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitial
 #endif
 }
 
+/**
+ * 
+ */
 void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
 {
 	AOxiFirstPersonCharacter* const Player = Cast <AOxiFirstPersonCharacter>(Other);

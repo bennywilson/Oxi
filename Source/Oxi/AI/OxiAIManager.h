@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../OxiCharacter.h"
-#include "AIManager.generated.h"
+#include "OxiCharacter.h"
+#include "OxiAIManager.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogOxiAI, Warning, All);
 
@@ -37,7 +37,7 @@ private:
 };
 
 UCLASS()
-class OXI_API UAISquadManager : public UObject
+class OXI_API UOxiAISquadManager : public UObject
 {
 	GENERATED_BODY()
 	
