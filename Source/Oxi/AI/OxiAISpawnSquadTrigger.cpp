@@ -2,6 +2,7 @@
 
 #include "OxiAISpawnSquadTrigger.h"
 #include "OxiAIManager.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BillboardComponent.h"
 
 AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitializer)
@@ -13,30 +14,43 @@ AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitial
 	SetRootComponent(NewSceneComponent);
 
 #if WITH_EDITORONLY_DATA
+	ArrowComponent = CreateEditorOnlyDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent0"));
 	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
 	if (!IsRunningCommandlet())
 	{
 		// Structure to hold one-time initialization
 		struct FConstructorStatics
 		{
-			ConstructorHelpers::FObjectFinderOptional<UTexture2D> DecalTexture;
+			ConstructorHelpers::FObjectFinderOptional<UTexture2D> SquadSpawnTexture;
 			FName ID_SpawnSquadTrigger;
-			FText NAME_Decals;
+			FText NAME_OxiAISpawn;
 			FConstructorStatics()
-				: DecalTexture(TEXT("/Game/Oxi/Editor/S_HiddenHand"))
+				: SquadSpawnTexture(TEXT("/Game/Oxi/Editor/S_HiddenHand"))
 				, ID_SpawnSquadTrigger(TEXT("SpawnSquad"))
-				, NAME_Decals(NSLOCTEXT("SpriteCategory", "SpawnSquad", "SpawnSquads"))
+				, NAME_OxiAISpawn(NSLOCTEXT("SpriteCategory", "OxiAISpawnSquad", "OxiAISpawnSquads"))
 			{
 			}
 		};
 		static FConstructorStatics ConstructorStatics;
 
+		if (ArrowComponent)
+		{
+			ArrowComponent->bTreatAsASprite = true;
+			ArrowComponent->ArrowSize = 1.0f;
+			ArrowComponent->ArrowColor = FColor(80, 80, 200, 255);
+			ArrowComponent->SpriteInfo.Category = ConstructorStatics.ID_SpawnSquadTrigger;
+			ArrowComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_OxiAISpawn;
+			ArrowComponent->SetupAttachment(NewSceneComponent);
+			ArrowComponent->SetUsingAbsoluteScale(true);
+			ArrowComponent->bIsScreenSizeScaled = true;
+		}
+
 		if (SpriteComponent)
 		{
-			SpriteComponent->Sprite = ConstructorStatics.DecalTexture.Get();
+			SpriteComponent->Sprite = ConstructorStatics.SquadSpawnTexture.Get();
 			SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 			SpriteComponent->SpriteInfo.Category = ConstructorStatics.ID_SpawnSquadTrigger;
-			SpriteComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_Decals;
+			SpriteComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_OxiAISpawn;
 			SpriteComponent->SetupAttachment(NewSceneComponent);
 			SpriteComponent->bIsScreenSizeScaled = true;
 			SpriteComponent->SetUsingAbsoluteScale(true);

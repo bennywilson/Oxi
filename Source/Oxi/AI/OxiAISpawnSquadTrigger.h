@@ -22,9 +22,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AOxiCharacter> OxiCharacterToSpawn;
 
+#if WITH_EDITORONLY_DATA
 	/* Reference to the billboard component */
 	UPROPERTY()
 	UBillboardComponent* SpriteComponent;
+
+	UPROPERTY()
+	UArrowComponent* ArrowComponent;
+#endif
 };
 
 UENUM()
