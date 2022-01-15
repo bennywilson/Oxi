@@ -108,6 +108,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
 	virtual void TakeDamage(const FOxiDamageInfo& DamageInfo);
 
+	bool IsAlive() const { return CurrentHealth > 0; }
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -120,6 +122,12 @@ protected:
 	TArray<USkeletalMeshComponent*>& GetSkeletalMeshes() { return SkeletalMeshes; }
 
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float BaseHealth;
+
+	UPROPERTY(Transient)
+	float CurrentHealth;
 
 	UPROPERTY(Transient)
 	TArray<USkeletalMeshComponent*> SkeletalMeshes;

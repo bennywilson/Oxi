@@ -1,0 +1,56 @@
+// ELP 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "../OxiCharacter.h"
+#include "GameFramework/PhysicsVolume.h"
+#include "AISpawnSquadTrigger.generated.h"
+
+UCLASS()
+class OXI_API AAISquadMemberSpawn : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	AAISquadMemberSpawn(const FObjectInitializer&);
+
+	TSubclassOf<AOxiCharacter> GetOxiCharacterClassToSpawn() const { return OxiCharacterToSpawn; }
+
+private:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AOxiCharacter> OxiCharacterToSpawn;
+
+	/* Reference to the billboard component */
+	UPROPERTY()
+	UBillboardComponent* SpriteComponent;
+};
+
+UENUM()
+enum class EAISpawnSquadTriggerCondition
+{
+	PlayerEntersVolume = 0,
+};
+
+/**
+ * 
+ */
+UCLASS()
+class OXI_API AAISpawnSquadTrigger : public APhysicsVolume
+{
+	GENERATED_BODY()
+	
+	virtual void ActorEnteredVolume(class AActor* Other) override;
+
+private:
+
+	UPROPERTY(EditAnywhere)
+	TArray<AAISquadMemberSpawn*> SquadMembersToSpawn;
+
+	UPROPERTY()
+	EAISpawnSquadTriggerCondition SpawnCondition;
+
+	UPROPERTY(Transient)
+	class UOxiSquad* Squad;
+};

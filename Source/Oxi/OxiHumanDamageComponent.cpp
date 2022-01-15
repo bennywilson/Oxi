@@ -28,6 +28,10 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 {
 	Super::TakeDamage_Internal(DamageInfo);
 
+	const float OldHealth = CurrentHealth;
+	CurrentHealth -= DamageInfo.DamageAmount;
+	bool bJustKilled = (OldHealth > 0 && CurrentHealth <= 0);
+
 	const float UnpausedTimeSec = GetWorld()->GetUnpausedTimeSeconds();
 
 	TArray<USceneComponent*> AllChildren;
@@ -180,5 +184,9 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 		}		
 	}
 
+	if (bJustKilled)
+	{
+		OnKilledDelegate.Broadcast(GetOwner(), DamageInfo.DamageCauser);
+	}
 	return 0.f;
 }

@@ -12,7 +12,8 @@ void UOxiDamageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<UActorComponent*> Children = GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass());
+	TArray<UActorComponent*> Children;
+	GetOwner()->GetComponents(USkeletalMeshComponent::StaticClass(), Children);
 
 	for (int iChild = 0; iChild < Children.Num(); iChild++)
 	{
@@ -24,6 +25,8 @@ void UOxiDamageComponent::BeginPlay()
 
 		SkeletalMeshes.Add(SkelMesh);
 	}
+
+	CurrentHealth = BaseHealth;
 }
 
 // Called every frame

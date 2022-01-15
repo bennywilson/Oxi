@@ -23,9 +23,6 @@ protected:
 
 	void LifeSpanCallback();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	float BaseHealth;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=FX)
 	TArray<TSubclassOf<AActor>> BloodDecals;
 
