@@ -9,6 +9,6 @@ public class Oxi : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PrivateIncludePaths.Add("Oxi");
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
+        PublicDependencyModuleNames.AddRange(new string[] { "AIMODULE", "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
 	}
 }

@@ -48,11 +48,15 @@ class OXI_API AOxiAICharacter : public AOxiCharacter
 
 public:
 
-	UFUNCTION(BlueprintImplementableEvent)
-	bool IssueSquadCommand(const FOxiAICommandData& CommandData);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	bool IssueAICommand(const FOxiAICommandData& CommandData);
 
-private:
+	UFUNCTION(BlueprintCallable)
+	bool HasReachedDestination();
+
+protected:
 	
+	UPROPERTY(Transient, BlueprintReadWrite)
 	OxiAICommand CurrentAICommand;
 };
 

@@ -3,6 +3,8 @@
 #include "OxiAIManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "OxiHumanDamageComponent.h"
+#include "AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
@@ -18,6 +20,16 @@ UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
 	}
 
 	return GameInst->GetSubsystem<UOxiAIManager>();
+}
+
+/**
+ *
+ */
+bool AOxiAICharacter::HasReachedDestination()
+{
+	AAIController* const AIController = Cast<AAIController>(GetController());
+	UPathFollowingComponent* const PathComponent = AIController->GetPathFollowingComponent();
+	return PathComponent->DidMoveReachGoal();
 }
 
 /**
@@ -148,7 +160,7 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 				continue;
 			}
 
-			SquadMember->IssueSquadCommand(AICommandData);
+			SquadMember->IssueAICommand(AICommandData);
 		}
 	}
 
@@ -185,7 +197,7 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 			AICommandData.AICommand = OxiAICommand::HoldPosition;
 			AICommandData.Target = EnemyList[0];
 			AICommandData.Goal = nullptr;
-			SquadMember->IssueSquadCommand(AICommandData);
+			SquadMember->IssueAICommand(AICommandData);
 			continue;
 		}
 
@@ -197,7 +209,7 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 
 		CoverList.RemoveAt(ClosestCoverIdx);
 
-		SquadMember->IssueSquadCommand(AICommandData);
+		SquadMember->IssueAICommand(AICommandData);
 	}
 }
 
