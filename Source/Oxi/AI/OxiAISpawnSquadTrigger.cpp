@@ -74,6 +74,12 @@ void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
 		return;
 	}
 
+	if (SquadTypes.Num() == 0)
+	{
+		UE_LOG(LogOxiAI, Warning, TEXT("AAISpawnSquadTrigger::ActorEnteredVolume() - Volume %s doesn't have any squad types"), *GetFullName());
+		return;
+	}
+
 	if (Squad != nullptr && Squad->GetNumAliveSquadMembers() > 0)
 	{
 		return;
@@ -87,14 +93,22 @@ void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
 
 	if (Squad != nullptr)
 	{
-		Squad->ShutdownSquad();
 		GWorld->DestroyActor(Squad);
 		Squad = nullptr;
 	}
 
 	FVector SpawnLoc = GetActorLocation();
 	FRotator SpawnRot = GetActorRotation();
-	Squad = Cast<AOxiSquad>(GWorld->SpawnActor(AOxiSquad::StaticClass(), &SpawnLoc, &SpawnRot));
+
+	const int SquadIdx = FMath::Rand() % SquadTypes.Num();
+	TSubclassOf<AOxiSquad> SquadType = SquadTypes[SquadIdx];
+
+	if (*SquadType == nullptr)
+	{
+		UE_LOG(LogOxiAI, Warning, TEXT("AAISpawnSquadTrigger::ActorEnteredVolume() - Volume %s has a null squad type"), *GetFullName());
+		return;
+	}
+	Squad = Cast<AOxiSquad>(GWorld->SpawnActor(SquadType, &SpawnLoc, &SpawnRot));
 
 	for (int i = 0; i < SquadMembersToSpawn.Num(); i++)
 	{

@@ -5,6 +5,7 @@
 #include "OxiDamageComponent.h"
 #include "OxiDestructibleComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTakeDamage, class AActor* const, float);
 
 UCLASS(Blueprintable, editinlinenew, meta = (BlueprintSpawnableComponent))
 class OXI_API UOxiDestructibleComponent : public UOxiDamageComponent
@@ -14,6 +15,8 @@ class OXI_API UOxiDestructibleComponent : public UOxiDamageComponent
 public:
 	// Sets default values for this actor's properties
 	UOxiDestructibleComponent();
+
+	FOnTakeDamage OnTakeDamageDelegate;
 
 protected:
 	// Called when the game starts or when spawned

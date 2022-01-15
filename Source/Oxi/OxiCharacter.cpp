@@ -10,6 +10,8 @@
 #include "Components/InputComponent.h"
 #include "Components/LightComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "AI/OxiAIManager.h"
+
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -19,11 +21,17 @@ void UOxiCharacterMovementComponent::RequestDirectMove(const FVector& MoveVeloci
 	Super::RequestDirectMove(MoveVelocity, bForceMaxSpeed);
 }
 
+/**
+ *
+ */
 AOxiCharacter::AOxiCharacter()
 {
 
 }
 
+/**
+ *
+ */
 AOxiCharacter::AOxiCharacter(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer.SetDefaultSubobjectClass<UOxiCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
@@ -63,6 +71,9 @@ AOxiFirstPersonCharacter::AOxiFirstPersonCharacter()
 	PlayerState = OxiPlayerState::Normal;
 }
 
+/**
+ *
+ */
 void AOxiFirstPersonCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -88,15 +99,35 @@ void AOxiFirstPersonCharacter::BeginPlay()
 	CurrentHealth = BaseHealth;
 
 	OnCharacterDeathEventHandle = UCombatManager::RegisterEventListener(this, FName("OnCharacterDeathEvent"));
+
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
+	AIMgr->RegisterPlayer(this);
+
 }
 
+/**
+ *
+ */
+void AOxiFirstPersonCharacter::EndPlay(EEndPlayReason::Type Reason)
+{
+	Super::EndPlay(Reason);
+	UCombatManager::UnregisterEventListener(OnCharacterDeathEventHandle);
+
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
+	AIMgr->UnregisterPlayer(this);
+}
+
+/**
+ * 
+ */
 void AOxiFirstPersonCharacter::BeginDestroy()
 {
 	Super::BeginDestroy();
-
-	UCombatManager::UnregisterEventListener(OnCharacterDeathEventHandle);
 }
 
+/**
+ *
+ */
 void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);

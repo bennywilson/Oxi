@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "OxiCharacter.h"
+#include "OxiAIManager.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "OxiAISpawnSquadTrigger.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
 class OXI_API AAISquadMemberSpawn : public AActor
 {
@@ -49,6 +53,9 @@ class OXI_API AAISpawnSquadTrigger : public APhysicsVolume
 	virtual void ActorEnteredVolume(class AActor* Other) override;
 
 private:
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<AOxiSquad>> SquadTypes;
 
 	UPROPERTY(EditAnywhere)
 	TArray<AAISquadMemberSpawn*> SquadMembersToSpawn;

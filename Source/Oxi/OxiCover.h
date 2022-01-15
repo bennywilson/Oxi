@@ -40,12 +40,22 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void AddUser(AOxiCharacter* const NewUser);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveUser(AOxiCharacter* const UserToRemove);
+
+	int NumberOfUsers() const { return CurrentUsers.Num(); }
+
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UOxiDestructibleComponent* DestructibleComponent;
 
@@ -57,4 +67,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* DamagedMesh;
+
+private:
+
+	void OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount);
+
+	UPROPERTY(Transient)
+	TArray<AOxiCharacter*> CurrentUsers;
 };

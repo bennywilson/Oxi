@@ -4,8 +4,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "OxiHumanDamageComponent.h"
 
-
 DEFINE_LOG_CATEGORY(LogOxiAI);
+
+/**
+ *	AI can ignore the AI command
+ */
+bool AOxiAICharacter::IssueSquadCommand_Implementation(const OxiAICommand AICommand, const FOxiAICommandData&)
+{
+	CurrentAICommand = AICommand;
+	return true;
+}
 
 /**
  * 
@@ -19,6 +27,14 @@ UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
 	}
 
 	return GameInst->GetSubsystem<UOxiAIManager>();
+}
+
+/**
+ * 
+ */
+AOxiSquad::AOxiSquad()
+{
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 /**
@@ -69,12 +85,18 @@ void AOxiSquad::BeginPlay()
  /**
   * 
   */
-void AOxiSquad::BeginDestroy()
+void AOxiSquad::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::BeginDestroy();
+	Super::EndPlay(EndPlayReason);
+
+	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+	{
+		GWorld->DestroyActor(CurrentSquadMembers[i]);
+	}
+
+	CurrentSquadMembers.Empty();
 
 	UOxiAIManager* AIMgr = GetOxiAIManager(this);
-
 	if (AIMgr != nullptr)
 	{
 		AIMgr->UnregisterSquad(this);
@@ -84,16 +106,27 @@ void AOxiSquad::BeginDestroy()
 /**
  *
  */
-void AOxiSquad::ShutdownSquad()
+void AOxiSquad::Tick(float DeltaTime)
 {
-	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+	Super::Tick(DeltaTime);
+
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
+	if (SquadState != EOxiSquadState::Attack)
 	{
-		GWorld->DestroyActor(CurrentSquadMembers[i]);
+		TArray<AOxiFirstPersonCharacter*> PlayerList = AIMgr->GetPlayerList();
+		if (PlayerList.Num() > 0)
+		{
+			AOxiFirstPersonCharacter* const Player = PlayerList[0];
+			for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+			{
+				AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
+				if (FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
+				{
+					SquadState = EOxiSquadState::Attack;
+				}
+			}
+		}
 	}
-
-	CurrentSquadMembers.Empty();
-
-	GetOxiAIManager(this)->UnregisterSquad(this);
 }
 
 /**
@@ -130,4 +163,36 @@ void UOxiAIManager::RegisterSquad(AOxiSquad* const Squad)
 void UOxiAIManager::UnregisterSquad(AOxiSquad* const Squad)
 {
 	SquadList.Remove(Squad);
+}
+
+/**
+ *
+ */
+void UOxiAIManager::RegisterCover(AOxiCover* const Squad)
+{
+	CoverList.Add(Squad);
+}
+
+/**
+ *
+ */
+void UOxiAIManager::UnregisterCover(AOxiCover* const Squad)
+{
+	CoverList.Remove(Squad);
+}
+
+/**
+ *
+ */
+void UOxiAIManager::RegisterPlayer(AOxiFirstPersonCharacter* const Player)
+{
+	PlayerList.Add(Player);
+}
+
+/**
+ *
+ */
+void UOxiAIManager::UnregisterPlayer(AOxiFirstPersonCharacter* const Player)
+{
+	PlayerList.Remove(Player);
 }
