@@ -1,6 +1,7 @@
 // ELP 2022
 
 #include "OxiAIManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "OxiHumanDamageComponent.h"
 
 
@@ -9,7 +10,21 @@ DEFINE_LOG_CATEGORY(LogOxiAI);
 /**
  * 
  */
-void UOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
+UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
+{
+	UGameInstance* const GameInst = UGameplayStatics::GetGameInstance(ActorContext->GetWorld());
+	if (GameInst == nullptr)
+	{
+		return nullptr;
+	}
+
+	return GameInst->GetSubsystem<UOxiAIManager>();
+}
+
+/**
+ * 
+ */
+void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 {
 	if (SquadMemberToAdd == nullptr)
 	{
@@ -20,7 +35,7 @@ void UOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(SquadMemberToAdd->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
 	{
-		DamageComp->OnKilledDelegate.AddUObject(this, &UOxiSquad::SquadMemberKilledCB);
+		DamageComp->OnKilledDelegate.AddUObject(this, &AOxiSquad::SquadMemberKilledCB);
 	}
 		
 	CurrentSquadMembers.Add(SquadMemberToAdd);
@@ -29,7 +44,7 @@ void UOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 /**
  * 
  */
-void UOxiSquad::SquadMemberKilledCB(AActor* const Victim, AActor* const Killer)
+void AOxiSquad::SquadMemberKilledCB(AActor* const Victim, AActor* const Killer)
 {
 	AOxiCharacter* const OxiChar = Cast<AOxiCharacter>(Victim);
 	check(OxiChar != nullptr);
@@ -44,21 +59,47 @@ void UOxiSquad::SquadMemberKilledCB(AActor* const Victim, AActor* const Killer)
 /**
  *
  */
-void UOxiSquad::BeginDestroy()
+void AOxiSquad::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetOxiAIManager(this)->RegisterSquad(this);
+ }
+
+ /**
+  * 
+  */
+void AOxiSquad::BeginDestroy()
 {
 	Super::BeginDestroy();
+
+	UOxiAIManager* AIMgr = GetOxiAIManager(this);
+
+	if (AIMgr != nullptr)
+	{
+		AIMgr->UnregisterSquad(this);
+	}
+}
+
+/**
+ *
+ */
+void AOxiSquad::ShutdownSquad()
+{
 	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
 	{
 		GWorld->DestroyActor(CurrentSquadMembers[i]);
 	}
 
 	CurrentSquadMembers.Empty();
+
+	GetOxiAIManager(this)->UnregisterSquad(this);
 }
 
 /**
  *
  */
-int UOxiSquad::GetNumAliveSquadMembers() const
+int AOxiSquad::GetNumAliveSquadMembers() const
 {
 	int NumAlive = 0;
 
@@ -78,15 +119,15 @@ int UOxiSquad::GetNumAliveSquadMembers() const
 /**
  * 
  */
-void UOxiAISquadManager::RegisterSquad(UOxiSquad* const Squad)
+void UOxiAIManager::RegisterSquad(AOxiSquad* const Squad)
 {
-
+	SquadList.Add(Squad);
 }
 
 /**
  * 
  */
-void UOxiAISquadManager::UnregisterSquad(UOxiSquad* const Squad)
+void UOxiAIManager::UnregisterSquad(AOxiSquad* const Squad)
 {
-
+	SquadList.Remove(Squad);
 }

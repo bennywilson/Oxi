@@ -15,15 +15,17 @@ class OXI_API AOxiAICharacter : public AOxiCharacter
 };
 
 UCLASS()
-class OXI_API UOxiSquad : public UObject
+class OXI_API AOxiSquad : public AActor
 {
 	GENERATED_BODY()
 
 public:
 
+	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
 
 	void AddSquadMember(AOxiCharacter* const SquadMember);
+	void ShutdownSquad();
 
 	int GetNumSquadMembers() const { return CurrentSquadMembers.Num(); }
 	int GetNumAliveSquadMembers() const;
@@ -37,15 +39,19 @@ private:
 };
 
 UCLASS()
-class OXI_API UOxiAISquadManager : public UObject
+class OXI_API UOxiAIManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	
-	void RegisterSquad(UOxiSquad* const Squad);
-	void UnregisterSquad(UOxiSquad* const Squad);
+
+public:
+
+	void RegisterSquad(AOxiSquad* const Squad);
+	void UnregisterSquad(AOxiSquad* const Squad);
 
 private:
 
 	UPROPERTY(Transient)
-	TArray<UOxiSquad*> SquadList;
+	TArray<AOxiSquad*> SquadList;
 };
+
+extern UOxiAIManager * GetOxiAIManager(AActor* ActorContext);

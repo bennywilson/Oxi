@@ -5,18 +5,27 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles\ParticleSystemComponent.h"
 
+/**
+ * 
+ */
 UOxiDestructibleComponent::UOxiDestructibleComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 }
 
+/**
+ *
+ */
 void UOxiDestructibleComponent::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
 }
 
+/**
+ *
+ */
 bool UOxiDestructibleComponent::InitDestructibleComponent(UStaticMeshComponent* InBaseMeshComponent, USkeletalMeshComponent* InDestructibleMeshComponent)
 {
 	BaseMeshComponent = InBaseMeshComponent;
@@ -36,6 +45,9 @@ bool UOxiDestructibleComponent::InitDestructibleComponent(UStaticMeshComponent* 
 	return true;
 }
 
+/**
+ *
+ */
 void UOxiDestructibleComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -58,6 +70,9 @@ void UOxiDestructibleComponent::TickComponent(float DeltaTime, enum ELevelTick T
 	}
 }
 
+/**
+ *
+ */
 float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
 	if (Health > 0.0f && Health - DamageInfo.DamageAmount <= 0.0f)

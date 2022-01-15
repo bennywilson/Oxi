@@ -57,5 +57,5 @@ private:
 	EAISpawnSquadTriggerCondition SpawnCondition;
 
 	UPROPERTY(Transient)
-	class UOxiSquad* Squad;
+	class AOxiSquad* Squad;
 };

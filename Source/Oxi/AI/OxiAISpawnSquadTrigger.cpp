@@ -87,11 +87,15 @@ void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
 
 	if (Squad != nullptr)
 	{
-		Squad->ConditionalBeginDestroy();
+		Squad->ShutdownSquad();
+		GWorld->DestroyActor(Squad);
 		Squad = nullptr;
 	}
 
-	Squad = NewObject<UOxiSquad>();
+	FVector SpawnLoc = GetActorLocation();
+	FRotator SpawnRot = GetActorRotation();
+	Squad = Cast<AOxiSquad>(GWorld->SpawnActor(AOxiSquad::StaticClass(), &SpawnLoc, &SpawnRot));
+
 	for (int i = 0; i < SquadMembersToSpawn.Num(); i++)
 	{
 		if (SquadMembersToSpawn[i] == nullptr)
