@@ -67,9 +67,12 @@ void AOxiCover::Tick(float DeltaTime)
 /**
  *
  */
-void AOxiCover::AddUser(AOxiCharacter* const NewUser)
+bool AOxiCover::AddUser(AOxiCharacter* const NewUser)
 {
 	CurrentUsers.Add(NewUser);
+	OnProtectionLevelChanged.AddUObject(NewUser, &AOxiCharacter::OnCoverProtectionLevelChanged);
+
+	return true;
 }
 
 /**
@@ -78,6 +81,7 @@ void AOxiCover::AddUser(AOxiCharacter* const NewUser)
 void AOxiCover::RemoveUser(AOxiCharacter* const UserToRemove)
 {
 	CurrentUsers.Remove(UserToRemove);
+	OnProtectionLevelChanged.RemoveAll(UserToRemove);
 }
 
 /**
@@ -85,5 +89,9 @@ void AOxiCover::RemoveUser(AOxiCharacter* const UserToRemove)
  */
 void AOxiCover::OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount)
 {
-
+	if (DestructibleComponent->GetNumBrokenPieces() == -1)
+	{
+		ProtectionLevel = EOxiCoverProtectionLevel::Broken;
+		OnProtectionLevelChanged.Broadcast(this, EOxiCoverProtectionLevel::Broken);
+	}
 }

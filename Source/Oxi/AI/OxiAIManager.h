@@ -54,6 +54,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasReachedDestination();
 
+	UFUNCTION(BlueprintCallable)
+	class AOxiCover* FindAndAcquireCover();
+
+protected:
+
+	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) override;
+
 protected:
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -92,7 +99,7 @@ public:
 
 private:
 
-	void SquadMemberKilledCB(AActor* const Victim, AActor* const Killer);
+	void SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState(TArray<AOxiCharacter*> EnemyList);
 
 protected:

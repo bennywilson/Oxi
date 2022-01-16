@@ -9,7 +9,7 @@
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
 /**
- * 
+ *	Helper functions
  */
 UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
 {
@@ -22,6 +22,39 @@ UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
 	return GameInst->GetSubsystem<UOxiAIManager>();
 }
 
+AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector TestPoint)
+{
+	float ClosestCoverDist = FLT_MAX;
+	int ClosestCoverIdx = -1;
+	for (int iCover = 0; iCover < CoverList.Num(); iCover++)
+	{
+		AOxiCover* const CurrentCover = CoverList[iCover];
+		if (CurrentCover->GetNumUsers() > 0)
+		{
+			continue;
+		}
+
+		if (CurrentCover->GetCoverProtectionLevel() == EOxiCoverProtectionLevel::Broken)
+		{
+			continue;
+		}
+
+		float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), TestPoint);
+		if (CoverDist < ClosestCoverDist)
+		{
+			ClosestCoverIdx = iCover;
+			ClosestCoverDist = CoverDist;
+		}
+	}
+
+	if (ClosestCoverIdx == -1)
+	{
+		return nullptr;
+	}
+
+	return CoverList[ClosestCoverIdx];
+}
+
 /**
  *
  */
@@ -32,9 +65,52 @@ bool AOxiAICharacter::HasReachedDestination()
 	return PathComponent->DidMoveReachGoal();
 }
 
+
 /**
  * 
  */
+AOxiCover* AOxiAICharacter::FindAndAcquireCover()
+{
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
+	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
+	AOxiCover* const NewCover = FindNearestUnusedCover(CoverList, GetActorLocation());
+	if (NewCover == nullptr)
+	{
+		return nullptr;
+	}
+
+	AcquireCover(NewCover);
+
+	return NewCover;
+}
+
+/**
+ *
+ */
+void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxiCoverProtectionLevel NewProtectionLevel)
+{
+	check(Cover);
+	if (NewProtectionLevel == EOxiCoverProtectionLevel::Broken)
+	{
+		// Cover is broken. Find new cover
+		ReleaseCover();
+		AOxiCover* const NearestCover = FindAndAcquireCover();
+		if (NearestCover != nullptr)
+		{
+			// Take Cover
+			FOxiAICommandData AICommandData;
+			AICommandData.AICommand = OxiAICommand::TakeCover;
+			AICommandData.Target = CurrentAICommand.Target;
+			AICommandData.Goal = NearestCover;
+
+			IssueAICommand(AICommandData);
+		}
+	}
+}
+
+ /**
+  * 
+  */
 AOxiSquad::AOxiSquad()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -54,7 +130,7 @@ void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(SquadMemberToAdd->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
 	{
-		DamageComp->OnKilledDelegate.AddUObject(this, &AOxiSquad::SquadMemberKilledCB);
+		DamageComp->OnDeath.AddUObject(this, &AOxiSquad::SquadMemberKilledCB);
 	}
 		
 	CurrentSquadMembers.Add(SquadMemberToAdd);
@@ -63,16 +139,14 @@ void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 /**
  * 
  */
-void AOxiSquad::SquadMemberKilledCB(AActor* const Victim, AActor* const Killer)
+void AOxiSquad::SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
 {
+	check(Victim);
 	AOxiCharacter* const OxiChar = Cast<AOxiCharacter>(Victim);
 	check(OxiChar != nullptr);
 
-	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(OxiChar->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
-	if (DamageComp != nullptr)
-	{
-		DamageComp->OnKilledDelegate.RemoveAll(this);
-	}
+	check(DamageComp);
+	DamageComp->OnDeath.RemoveAll(this);
 }
 
 /**
@@ -83,11 +157,11 @@ void AOxiSquad::BeginPlay()
 	Super::BeginPlay();
 
 	GetOxiAIManager(this)->RegisterSquad(this);
- }
+}
 
- /**
-  * 
-  */
+/**
+ *
+ */
 void AOxiSquad::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -172,44 +246,30 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 			continue;
 		}
 
-		float ClosestCoverDist = FLT_MAX;
-		int ClosestCoverIdx = -1;
-		for (int iCover = 0; iCover < CoverList.Num(); iCover++)
+		// TODO: Use Find and acquire here?
+		AOxiCover* const NearestCover = FindNearestUnusedCover(CoverList, SquadMember->GetActorLocation());
+		if (NearestCover == nullptr)
 		{
-			AOxiCover* const CurrentCover = CoverList[iCover];
-			if (CurrentCover->GetNumUsers() > 0)
-			{
-				continue;
-			}
-
-			float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), EnemyList[0]->GetActorLocation());
-			if (CoverDist < ClosestCoverDist)
-			{
-				ClosestCoverIdx = iCover;
-				ClosestCoverDist = CoverDist;
-			}
-		}
-
-		// No suitable cover found.  Hold current position
-		if (ClosestCoverIdx == -1)
-		{
+			// Hold current position
 			FOxiAICommandData AICommandData;
 			AICommandData.AICommand = OxiAICommand::HoldPosition;
 			AICommandData.Target = EnemyList[0];
 			AICommandData.Goal = nullptr;
 			SquadMember->IssueAICommand(AICommandData);
-			continue;
 		}
+		else
+		{
+			// Take Cover
+			FOxiAICommandData AICommandData;
+			AICommandData.AICommand = OxiAICommand::TakeCover;
+			AICommandData.Target = EnemyList[0];
+			AICommandData.Goal = NearestCover;
 
-		// Take Cover
-		FOxiAICommandData AICommandData;
-		AICommandData.AICommand = OxiAICommand::TakeCover;
-		AICommandData.Target = EnemyList[0];
-		AICommandData.Goal = CoverList[ClosestCoverIdx];
-
-		CoverList.RemoveAt(ClosestCoverIdx);
-
-		SquadMember->IssueAICommand(AICommandData);
+			CoverList.Remove(NearestCover);
+				
+			SquadMember->AcquireCover(NearestCover);	// TODO - What if AI overrides?
+			SquadMember->IssueAICommand(AICommandData);
+		}
 	}
 }
 

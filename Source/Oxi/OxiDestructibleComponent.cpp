@@ -98,6 +98,7 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 		DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
 		FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
 		DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+		NumBrokenPieces++;
 	}
 
 	if (OldHealth > 0.0f && Health <= 0.0f)
@@ -109,6 +110,7 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 
 		if (DestructibleMeshComponent != nullptr)
 		{
+			NumBrokenPieces = -1;
 			SmearStartTime = GetWorld()->GetUnpausedTimeSeconds();
 			DestructibleMeshComponent->SetSimulatePhysics(true);
 			DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);

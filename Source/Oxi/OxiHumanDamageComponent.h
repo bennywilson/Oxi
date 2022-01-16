@@ -6,8 +6,7 @@
 #include "OxiDamageComponent.h"
 #include "OxiHumanDamageComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnKilledDelegate, class AActor* const, class AActor* const);
-
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDamageComponentOnDeath, UOxiHumanDamageComponent* const, class AActor* const, class AActor* const);
 
 /**
  * 
@@ -20,7 +19,7 @@ class OXI_API UOxiHumanDamageComponent : public UOxiDamageComponent
 public:
 	virtual void BeginPlay() override;
 
-	FOnKilledDelegate OnKilledDelegate;
+	FDamageComponentOnDeath OnDeath;
 
 protected:
 

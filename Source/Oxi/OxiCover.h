@@ -35,7 +35,7 @@ public:
 
 	EOxiCoverProtectionLevel GetCoverProtectionLevel() const { return ProtectionLevel;}
 
-	FOnProtectionlevelSignature ProtectionLevelChanged;
+	FOnProtectionlevelSignature OnProtectionLevelChanged;
 
 protected:
 
@@ -47,7 +47,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void AddUser(AOxiCharacter* const NewUser);
+	bool AddUser(AOxiCharacter* const NewUser);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveUser(AOxiCharacter* const UserToRemove);

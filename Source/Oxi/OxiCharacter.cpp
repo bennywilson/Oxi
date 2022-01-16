@@ -6,6 +6,7 @@
 #include "OxiWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "OxiHumanDamageComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/LightComponent.h"
@@ -36,6 +37,75 @@ AOxiCharacter::AOxiCharacter(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer.SetDefaultSubobjectClass<UOxiCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 
+}
+
+/**
+ * 
+ */
+void AOxiCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
+	if (DamageComp != nullptr)
+	{
+		DamageComp->OnDeath.AddUObject(this, &AOxiCharacter::OnDeath);
+	}
+}
+
+/**
+ *
+ */
+void AOxiCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
+	if (DamageComp != nullptr)
+	{
+		DamageComp->OnDeath.RemoveAll(this);
+	}
+
+	ReleaseCover();
+}
+
+/**
+ *
+ */
+void AOxiCharacter::OnDeath(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
+{
+	check(DamageComp);
+
+	DamageComp->OnDeath.RemoveAll(this);
+
+	ReleaseCover();
+}
+
+/**
+ *
+ */
+bool AOxiCharacter::AcquireCover(AOxiCover* const Cover)
+{
+	if (Cover->AddUser(this))
+	{
+		CurrentCover = Cover;
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * 
+ */
+void AOxiCharacter::ReleaseCover()
+{
+	if (CurrentCover == nullptr)
+	{
+		return;
+	}
+	CurrentCover->RemoveUser(this);
+	CurrentCover = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////

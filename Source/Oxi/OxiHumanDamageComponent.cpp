@@ -186,7 +186,7 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 
 	if (bJustKilled)
 	{
-		OnKilledDelegate.Broadcast(GetOwner(), DamageInfo.DamageCauser);
+		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
 	return 0.f;
 }

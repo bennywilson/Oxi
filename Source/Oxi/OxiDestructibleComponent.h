@@ -29,6 +29,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Oxi Damage")
 	bool InitDestructibleComponent(UStaticMeshComponent* InBaseMeshComponent, USkeletalMeshComponent* InDestructibleMeshComponent);
 
+	int GetNumBrokenPieces() const { return NumBrokenPieces; }
+
 private:
 	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) override;
 
@@ -92,6 +94,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
 	bool DisableCollisionWhenDead;
+
+	UPROPERTY(Transient)
+	int NumBrokenPieces;
 
 	float ExplosionLightTargetIntensity;
 

@@ -5,19 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "OxiWeapon.h"
+#include "OxiCover.h"
 #include "OxiDamageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OxiCharacter.generated.h"
 
 class UInputComponent;
 
-UENUM(BlueprintType)
-enum OxiPlayerState
-{
-	Normal,
-	Interacting
-};
-
+/**
+ * 
+ */
 UCLASS()
 class OXI_API UOxiAnimInstance : public UAnimInstance
 {
@@ -29,6 +26,9 @@ protected:
 	TMap<FName, UAnimSequence*> AnimSequenceMap;
 };
 
+/**
+ * 
+ */
 UCLASS()
 class UOxiCharacterMovementComponent : public UCharacterMovementComponent
 {
@@ -40,16 +40,46 @@ class UOxiCharacterMovementComponent : public UCharacterMovementComponent
 	FVector GetRequestedVelocity() const { return RequestedVelocity; }
 };
 
+/**
+ *	AOxiCharacter
+ */
+
+UENUM(BlueprintType)
+enum OxiPlayerState
+{
+	Normal,
+	Interacting
+};
+
 UCLASS()
 class AOxiCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
+
 	AOxiCharacter();
 	AOxiCharacter(const FObjectInitializer&);
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	bool AcquireCover(AOxiCover* const Cover);
+	void ReleaseCover();
+
+	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) { }
+
+private:
+
+	virtual void OnDeath(class UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
+
+	UPROPERTY(Transient)
+	AOxiCover* CurrentCover;
 };
 
+/**
+ *
+ */
 UCLASS()
 class AOxiFirstPersonCharacter : public AOxiCharacter
 {
