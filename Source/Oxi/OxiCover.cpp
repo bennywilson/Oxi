@@ -24,6 +24,7 @@ AOxiCover::AOxiCover()
 
 	DamagedMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DamagedMesh"));
 	DamagedMesh->SetupAttachment(DestructibleComponent);
+	DamagedMesh->SetCollisionProfileName(FName("BlockAllDynamic"));
 }
 
 /**

@@ -21,6 +21,8 @@ void UOxiDestructibleComponent::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	ThresholdToShowDamagedMeshAt = FMath::Min(ThresholdToShowDamagedMeshAt, Health);
 }
 
 /**
@@ -75,12 +77,31 @@ void UOxiDestructibleComponent::TickComponent(float DeltaTime, enum ELevelTick T
  */
 float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
-	if (Health > 0.0f && Health - DamageInfo.DamageAmount <= 0.0f)
+	const float OldHealth = Health;
+	Health -= DamageInfo.DamageAmount;
+	
+	// Swap Meshes
+	if (OldHealth > ThresholdToShowDamagedMeshAt && Health <= FMath::Max(0.0f, ThresholdToShowDamagedMeshAt) && DestructibleMeshComponent != nullptr)
 	{
 		BaseMeshComponent->SetHiddenInGame(true);
 		BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		BaseMeshComponent->SetGenerateOverlapEvents(false);
+		DestructibleMeshComponent->SetHiddenInGame(false);
+		DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		DestructibleMeshComponent->SetSimulatePhysics(true);
+		DestructibleMeshComponent->SetAllBodiesSimulatePhysics(false);
+	}
 
+	// Knock individual bodies off
+	if (DamageInfo.HitBoneName != NAME_None)
+	{
+		DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
+		FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
+		DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+	}
+
+	if (OldHealth > 0.0f && Health <= 0.0f)
+	{
 		if (ExplosionSound != nullptr)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetComponentTransform().GetLocation());
@@ -89,11 +110,14 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 		if (DestructibleMeshComponent != nullptr)
 		{
 			SmearStartTime = GetWorld()->GetUnpausedTimeSeconds();
-
-			DestructibleMeshComponent->SetHiddenInGame(false);
 			DestructibleMeshComponent->SetSimulatePhysics(true);
 			DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-			
+			if (DisableCollisionWhenDead)
+			{
+				DestructibleMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+				DestructibleMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+			}
+
 			const FVector ExplosionLocation = DestructibleMeshComponent->GetSocketLocation("ExplosionLocation");
 
 			for (FBodyInstance* BI : DestructibleMeshComponent->Bodies)

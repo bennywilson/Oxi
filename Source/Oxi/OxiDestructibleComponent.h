@@ -87,6 +87,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
 	float ExplosionLightDurationSec;
 
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
+	float ThresholdToShowDamagedMeshAt;
+
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
+	bool DisableCollisionWhenDead;
+
 	float ExplosionLightTargetIntensity;
 
 	UStaticMeshComponent* BaseMeshComponent;
