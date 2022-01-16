@@ -57,7 +57,7 @@ public:
 protected:
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	OxiAICommand CurrentAICommand;
+	FOxiAICommandData CurrentAICommand;
 };
 
 /**
