@@ -9,20 +9,20 @@
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
 /**
- *	Helper functions
+ *
  */
-UOxiAIManager* GetOxiAIManager(AActor* ActorContext)
+UOxiAIManager* GetOxiAIManager(AActor* const WorldContextObject)
 {
-	UGameInstance* const GameInst = UGameplayStatics::GetGameInstance(ActorContext->GetWorld());
-	if (GameInst == nullptr)
-	{
-		return nullptr;
-	}
+	UGameInstance* const GameInst = UGameplayStatics::GetGameInstance(WorldContextObject);
+	check(GameInst);
 
 	return GameInst->GetSubsystem<UOxiAIManager>();
 }
 
-AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector TestPoint)
+/**
+ *
+ */
+AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector& TestPoint)
 {
 	float ClosestCoverDist = FLT_MAX;
 	int ClosestCoverIdx = -1;
@@ -39,7 +39,7 @@ AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector Te
 			continue;
 		}
 
-		float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), TestPoint);
+		const float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), TestPoint);
 		if (CoverDist < ClosestCoverDist)
 		{
 			ClosestCoverIdx = iCover;
@@ -61,7 +61,9 @@ AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector Te
 bool AOxiAICharacter::HasReachedDestination()
 {
 	AAIController* const AIController = Cast<AAIController>(GetController());
-	UPathFollowingComponent* const PathComponent = AIController->GetPathFollowingComponent();
+	check(AIController);
+
+	const UPathFollowingComponent* const PathComponent = AIController->GetPathFollowingComponent();
 	return PathComponent->DidMoveReachGoal();
 }
 
@@ -121,11 +123,7 @@ AOxiSquad::AOxiSquad()
  */
 void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 {
-	if (SquadMemberToAdd == nullptr)
-	{
-		UE_LOG(LogOxiAI, Warning, TEXT("UOxiSquad::AddSquadMember() - Tried to add null squad member"));
-		return;
-	}
+	check(SquadMemberToAdd);
 
 	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(SquadMemberToAdd->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
@@ -141,11 +139,11 @@ void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
  */
 void AOxiSquad::SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
 {
-	check(Victim);
+	check(DamageComp);
+
 	AOxiCharacter* const OxiChar = Cast<AOxiCharacter>(Victim);
 	check(OxiChar != nullptr);
 
-	check(DamageComp);
 	DamageComp->OnDeath.RemoveAll(this);
 }
 
@@ -174,10 +172,7 @@ void AOxiSquad::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	CurrentSquadMembers.Empty();
 
 	UOxiAIManager* AIMgr = GetOxiAIManager(this);
-	if (AIMgr != nullptr)
-	{
-		AIMgr->UnregisterSquad(this);
-	}
+	AIMgr->UnregisterSquad(this);
 }
 
 /**
@@ -216,9 +211,9 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 {
 	check(EnemyList.Num() > 0);
 
-	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	SquadState = EOxiSquadState::Attack;
 
+	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
 	if (CoverList.Num() == 0)
 	{
@@ -229,11 +224,6 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 		for (int i = 0; i < CurrentSquadMembers.Num(); i++)
 		{
 			AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[i]);
-			if (SquadMember == nullptr)
-			{
-				continue;
-			}
-
 			SquadMember->IssueAICommand(AICommandData);
 		}
 	}
@@ -241,12 +231,7 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 	for (int iSquad = 0; iSquad < CurrentSquadMembers.Num(); iSquad++)
 	{
 		AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[iSquad]);
-		if (SquadMember == nullptr)
-		{
-			continue;
-		}
 
-		// TODO: Use Find and acquire here?
 		AOxiCover* const NearestCover = FindNearestUnusedCover(CoverList, SquadMember->GetActorLocation());
 		if (NearestCover == nullptr)
 		{
@@ -267,7 +252,7 @@ void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
 
 			CoverList.Remove(NearestCover);
 				
-			SquadMember->AcquireCover(NearestCover);	// TODO - What if AI overrides?
+			SquadMember->AcquireCover(NearestCover);	// TODO - put inside of blueprint
 			SquadMember->IssueAICommand(AICommandData);
 		}
 	}

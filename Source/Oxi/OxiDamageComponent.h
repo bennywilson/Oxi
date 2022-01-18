@@ -92,6 +92,21 @@ struct FWoundInstance
 	float HitTime;
 };
 
+/**
+ * 
+ */
+ USTRUCT(BlueprintType)
+struct FOxiBloodSplatterData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<AActor>> SplatterActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BloodSprayDistance;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class OXI_API UOxiDamageComponent : public USceneComponent
 {
@@ -134,6 +149,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FX)
 	TArray<FWoundData> WoundData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FOxiBloodSplatterData> BloodSplatter;
 
 	TArray<FWoundInstance> WoundInstances;
 

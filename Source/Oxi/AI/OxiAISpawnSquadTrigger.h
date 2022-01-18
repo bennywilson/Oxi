@@ -22,12 +22,10 @@ public:
 	TSubclassOf<AOxiCharacter> GetOxiCharacterClassToSpawn() const { return OxiCharacterToSpawn; }
 
 private:
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AOxiCharacter> OxiCharacterToSpawn;
 
 #if WITH_EDITORONLY_DATA
-	/* Reference to the billboard component */
 	UPROPERTY()
 	UBillboardComponent* SpriteComponent;
 
@@ -36,6 +34,9 @@ private:
 #endif
 };
 
+/**
+ * 
+ */
 UENUM()
 enum class EAISpawnSquadTriggerCondition
 {

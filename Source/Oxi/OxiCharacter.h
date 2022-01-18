@@ -10,8 +10,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OxiCharacter.generated.h"
 
-class UInputComponent;
-
 /**
  * 
  */
@@ -21,7 +19,6 @@ class OXI_API UOxiAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 protected:
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Oxi Anim")
 	TMap<FName, UAnimSequence*> AnimSequenceMap;
 };
@@ -43,7 +40,6 @@ class UOxiCharacterMovementComponent : public UCharacterMovementComponent
 /**
  *	AOxiCharacter
  */
-
 UENUM(BlueprintType)
 enum OxiPlayerState
 {
@@ -57,7 +53,6 @@ class AOxiCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-
 	AOxiCharacter();
 	AOxiCharacter(const FObjectInitializer&);
 
@@ -70,7 +65,6 @@ public:
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) { }
 
 private:
-
 	virtual void OnDeath(class UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 
 	UPROPERTY(Transient)
@@ -85,7 +79,27 @@ class AOxiFirstPersonCharacter : public AOxiCharacter
 {
 	GENERATED_BODY()
 
+public:
+	AOxiFirstPersonCharacter();
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void BeginDestroy() override;
+
+	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction);
+
+	/** Returns Mesh1P subobject **/
+	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	/** Returns FirstPersonCameraComponent subobject **/
+	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
 protected:
+	void OnFire();
+	void MoveForward(float Val);
+	void MoveRight(float Val);
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	class USkeletalMeshComponent* Mesh1P;
 
@@ -104,18 +118,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
 	TSubclassOf<AOxiWeapon> DefaultWeapon;
 
-public:
-	AOxiFirstPersonCharacter();
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void BeginDestroy() override;
-
-	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction);
+private:
+	UFUNCTION()
+	void OnCharacterDeathEvent(class UOxiDamageComponent* Victim, UOxiDamageComponent* Killer);
 
 public:
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseTurnRate;
 
@@ -152,38 +159,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Weapon")
 	bool StartFireWeapon(const UCameraComponent* const CameraComp1P);
 
-private:
-
-	UMaterialInstanceDynamic* HandsMaterial;
-	float CurrentHealth;
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 private:
 	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo);
 
-protected:
-
-	void OnFire();
-
-	void MoveForward(float Val);
-	void MoveRight(float Val);
-	void TurnAtRate(float Rate);
-	void LookUpAtRate(float Rate);
-
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
-
-public:
-	/** Returns Mesh1P subobject **/
-	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
-	/** Returns FirstPersonCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
 private:
+	UMaterialInstanceDynamic* HandsMaterial;
 
-	UFUNCTION()
-	void OnCharacterDeathEvent(class UOxiDamageComponent* Victim, UOxiDamageComponent* Killer);
+	float CurrentHealth;
 
 	FDelegateHandle OnCharacterDeathEventHandle;
 

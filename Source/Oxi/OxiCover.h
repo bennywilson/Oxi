@@ -19,7 +19,7 @@ enum class EOxiCoverProtectionLevel
 	Broken
 };
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnProtectionlevelSignature, class AOxiCover* const, EOxiCoverProtectionLevel);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnProtectionLevel, class AOxiCover* const, EOxiCoverProtectionLevel);
 
 /**
  * 
@@ -30,19 +30,7 @@ class OXI_API AOxiCover : public AActor
 	GENERATED_BODY()
 	
 public:
-
 	AOxiCover();
-
-	EOxiCoverProtectionLevel GetCoverProtectionLevel() const { return ProtectionLevel;}
-
-	FOnProtectionlevelSignature OnProtectionLevelChanged;
-
-protected:
-
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-public:	
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -54,8 +42,19 @@ public:
 
 	int GetNumUsers() const { return CurrentUsers.Num(); }
 
-protected:
+	EOxiCoverProtectionLevel GetCoverProtectionLevel() const { return ProtectionLevel;}
 
+protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+private:
+	void OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount);
+
+public:
+	FOnProtectionLevel OnProtectionLevelChanged;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UOxiDestructibleComponent* DestructibleComponent;
 
@@ -69,9 +68,6 @@ protected:
 	class USkeletalMeshComponent* DamagedMesh;
 
 private:
-
-	void OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount);
-
 	UPROPERTY(Transient)
 	TArray<AOxiCharacter*> CurrentUsers;
 };

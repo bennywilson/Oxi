@@ -44,6 +44,31 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 
 	bool bAddedWound = false;
 
+	// Bloodspray
+	if (BloodSplatter.Num() > 0)
+	{
+		const int SplatterIdx = FMath::RandRange(0, BloodSplatter.Num() - 1);
+		FOxiBloodSplatterData& Splatter = BloodSplatter[SplatterIdx];
+		if (Splatter.SplatterActor.Num() > 0)
+		{
+			const int ActorIdx = FMath::RandRange(0, Splatter.SplatterActor.Num() - 1);
+			TSubclassOf<AActor> SplatterActor = Splatter.SplatterActor[ActorIdx];
+			if (*SplatterActor != nullptr)
+			{
+				const FVector TraceDirection = (DamageInfo.DamageLocation - DamageInfo.DamageCauser->GetActorLocation()).GetSafeNormal() * Splatter.BloodSprayDistance;
+				FHitResult HitResult;
+				FCollisionObjectQueryParams ObjectType(ECollisionChannel::ECC_WorldStatic);
+				const bool bHit = GWorld->LineTraceSingleByObjectType(HitResult, DamageInfo.DamageLocation, DamageInfo.DamageLocation + TraceDirection, ObjectType);
+				if (bHit)
+				{
+					FRotator ImpactNormalRotation = HitResult.ImpactNormal.ToOrientationRotator();
+					ImpactNormalRotation = FRotationMatrix(ImpactNormalRotation).GetScaledAxis(EAxis::Z).ToOrientationRotator();
+
+					GWorld->SpawnActor(SplatterActor, &HitResult.Location, &ImpactNormalRotation);
+				}
+			}
+		}
+	}
 	for (int i = 0; i < SkeletalMeshes.Num(); i++)
 	{
 		USkeletalMeshComponent* const SkelMesh = SkeletalMeshes[i];

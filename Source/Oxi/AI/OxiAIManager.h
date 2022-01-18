@@ -23,6 +23,9 @@ enum class OxiAICommand : uint8
 	HoldPosition,
 };
 
+/**
+ *
+ */
 USTRUCT(BlueprintType)
 struct FOxiAICommandData
 {
@@ -47,7 +50,6 @@ class OXI_API AOxiAICharacter : public AOxiCharacter
 	GENERATED_BODY()
 
 public:
-
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	bool IssueAICommand(const FOxiAICommandData& CommandData);
 
@@ -55,14 +57,12 @@ public:
 	bool HasReachedDestination();
 
 	UFUNCTION(BlueprintCallable)
-	class AOxiCover* FindAndAcquireCover();
+	AOxiCover* FindAndAcquireCover();
 
 protected:
-
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) override;
 
 protected:
-	
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FOxiAICommandData CurrentAICommand;
 };
@@ -78,13 +78,15 @@ enum class EOxiSquadState : uint8
 	Attack
 };
 
+/**
+ *
+ */
 UCLASS(BlueprintType)
 class OXI_API AOxiSquad : public AActor
 {
 	GENERATED_BODY()
 
 public:
-
 	AOxiSquad();
 
 	virtual void BeginPlay() override;
@@ -98,12 +100,10 @@ public:
 	int GetNumAliveSquadMembers() const;
 
 private:
-
 	void SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState(TArray<AOxiCharacter*> EnemyList);
 
 protected:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiSquadState SquadState;
 
@@ -111,7 +111,6 @@ protected:
 	float PerceptionRadius;
 
 private:
-
 	UPROPERTY(Transient)
 	TArray<AOxiCharacter*> CurrentSquadMembers;
 };
@@ -122,10 +121,10 @@ private:
 UCLASS()
 class OXI_API UOxiAIManager : public UGameInstanceSubsystem
 {
+
 	GENERATED_BODY()
 
 public:
-
 	void RegisterSquad(AOxiSquad* const Squad);
 	void UnregisterSquad(AOxiSquad* const Squad);
 
@@ -136,11 +135,9 @@ public:
 	void UnregisterPlayer(AOxiFirstPersonCharacter* const Player);
 
 	const TArray<AOxiFirstPersonCharacter*> GetPlayerList() const { return PlayerList; }
-
 	TArray<AOxiCover*> GetCoverList() const { return CoverList; }
 
 private:
-
 	UPROPERTY(Transient)
 	TArray<AOxiFirstPersonCharacter*> PlayerList;
 
@@ -151,4 +148,4 @@ private:
 	TArray<AOxiCover*> CoverList;
 };
 
-extern UOxiAIManager * GetOxiAIManager(AActor* ActorContext);
+extern UOxiAIManager * GetOxiAIManager(AActor* const WorldContextObject);

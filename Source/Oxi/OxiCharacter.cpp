@@ -27,7 +27,6 @@ void UOxiCharacterMovementComponent::RequestDirectMove(const FVector& MoveVeloci
  */
 AOxiCharacter::AOxiCharacter()
 {
-
 }
 
 /**
@@ -36,7 +35,6 @@ AOxiCharacter::AOxiCharacter()
 AOxiCharacter::AOxiCharacter(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer.SetDefaultSubobjectClass<UOxiCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-
 }
 
 /**
@@ -75,7 +73,6 @@ void AOxiCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AOxiCharacter::OnDeath(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
 {
 	check(DamageComp);
-
 	DamageComp->OnDeath.RemoveAll(this);
 
 	ReleaseCover();
@@ -104,13 +101,14 @@ void AOxiCharacter::ReleaseCover()
 	{
 		return;
 	}
+
 	CurrentCover->RemoveUser(this);
 	CurrentCover = nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// AOxiFirstPersonCharacter
-
+/**
+ * 
+ */
 AOxiFirstPersonCharacter::AOxiFirstPersonCharacter()
 {
 	// Set size for collision capsule

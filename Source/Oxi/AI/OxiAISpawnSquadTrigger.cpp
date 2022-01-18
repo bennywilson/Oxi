@@ -1,7 +1,6 @@
 // ELP 2022
 
 #include "OxiAISpawnSquadTrigger.h"
-#include "OxiAIManager.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BillboardComponent.h"
 
@@ -66,7 +65,7 @@ AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitial
 /**
  * 
  */
-void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
+void AAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
 {
 	AOxiFirstPersonCharacter* const Player = Cast <AOxiFirstPersonCharacter>(Other);
 	if (Other == nullptr)
@@ -97,8 +96,8 @@ void AAISpawnSquadTrigger::ActorEnteredVolume(class AActor* Other)
 		Squad = nullptr;
 	}
 
-	FVector SpawnLoc = GetActorLocation();
-	FRotator SpawnRot = GetActorRotation();
+	const FVector SpawnLoc = GetActorLocation();
+	const FRotator SpawnRot = GetActorRotation();
 
 	const int SquadIdx = FMath::Rand() % SquadTypes.Num();
 	TSubclassOf<AOxiSquad> SquadType = SquadTypes[SquadIdx];
