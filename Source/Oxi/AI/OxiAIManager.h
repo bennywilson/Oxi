@@ -70,54 +70,6 @@ protected:
 /**
  *
  */
-UENUM(BlueprintType)
-enum class EOxiSquadState : uint8
-{
-	Idle,
-	Patrol,
-	Attack
-};
-
-/**
- *
- */
-UCLASS(BlueprintType)
-class OXI_API AOxiSquad : public AActor
-{
-	GENERATED_BODY()
-
-public:
-	AOxiSquad();
-
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	virtual void Tick(float DeltaTime) override;
-
-	void AddSquadMember(AOxiCharacter* const SquadMember);
-
-	int GetNumSquadMembers() const { return CurrentSquadMembers.Num(); }
-	int GetNumAliveSquadMembers() const;
-
-private:
-	void SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
-	void EnterAttackState(TArray<AOxiCharacter*> EnemyList);
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EOxiSquadState SquadState;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PerceptionRadius;
-
-private:
-	UPROPERTY(Transient)
-	TArray<AOxiCharacter*> CurrentSquadMembers;
-};
-
-/**
- *
- */
 UCLASS()
 class OXI_API UOxiAIManager : public UGameInstanceSubsystem
 {
@@ -125,7 +77,7 @@ class OXI_API UOxiAIManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	void RegisterSquad(AOxiSquad* const Squad);
+	void RegisterSquad(class AOxiSquad* const Squad);
 	void UnregisterSquad(AOxiSquad* const Squad);
 
 	void RegisterCover(AOxiCover* const Cover);
@@ -149,3 +101,4 @@ private:
 };
 
 extern UOxiAIManager * GetOxiAIManager(AActor* const WorldContextObject);
+extern AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector& TestPoint);

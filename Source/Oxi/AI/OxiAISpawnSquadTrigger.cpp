@@ -1,6 +1,7 @@
 // ELP 2022
 
 #include "OxiAISpawnSquadTrigger.h"
+#include "OxiSquad.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BillboardComponent.h"
 
