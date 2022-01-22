@@ -64,7 +64,12 @@ public:
 
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) { }
 
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDeath_Internal(UOxiHumanDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
+
 private:
+
 	virtual void OnDeath(class UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 
 	UPROPERTY(Transient)

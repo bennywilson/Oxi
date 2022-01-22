@@ -67,11 +67,14 @@ void AOxiCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	ReleaseCover();
 }
 
+
 /**
  *
  */
 void AOxiCharacter::OnDeath(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
 {
+	OnDeath_Internal(DamageComp, Victim, Killer);
+
 	check(DamageComp);
 	DamageComp->OnDeath.RemoveAll(this);
 

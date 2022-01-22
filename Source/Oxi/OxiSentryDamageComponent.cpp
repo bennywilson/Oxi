@@ -151,6 +151,7 @@ float UOxiSentryDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 				DamageAmount *= 0.5f;
 				SkelMesh->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true);
 				SkelMesh->SetAllBodiesBelowPhysicsBlendWeight(DamageInfo.HitBoneName, 1.0f);
+
 				// Break the constraint
 				int32 ConstraintIndex = SkelMesh->FindConstraintIndex(DamageInfo.HitBoneName);
 				if (ConstraintIndex != INDEX_NONE && ConstraintIndex < SkelMesh->Constraints.Num())
