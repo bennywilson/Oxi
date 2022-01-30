@@ -89,7 +89,7 @@ void AOxiSquad::Tick(float DeltaTime)
 			for (int i = 0; i < CurrentSquadMembers.Num(); i++)
 			{
 				AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
-				if (FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
+				if (PerceptionRadius <= 0.0f || FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
 				{
 					TArray<AOxiCharacter*> EnemyList;
 					EnemyList.Add(Player);

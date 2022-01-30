@@ -1,6 +1,6 @@
 // ELP 2022
 
-#include "OxiAISpawnSquadTrigger.h"
+#include "OxiAIVolumes.h"
 #include "OxiSquad.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BillboardComponent.h"
@@ -8,7 +8,7 @@
 /**
  * 
  */
-AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitializer)
+AOxiAISquadMemberSpawn::AOxiAISquadMemberSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -66,7 +66,7 @@ AAISquadMemberSpawn::AAISquadMemberSpawn(const FObjectInitializer& ObjectInitial
 /**
  * 
  */
-void AAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
+void AOxiAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
 {
 	AOxiFirstPersonCharacter* const Player = Cast <AOxiFirstPersonCharacter>(Other);
 	if (Other == nullptr)

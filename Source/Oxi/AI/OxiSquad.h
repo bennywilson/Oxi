@@ -11,15 +11,6 @@
 /**
  *
  */
-USTRUCT(BlueprintType)
-struct OXI_API FOxiSquadAction
-{
-		GENERATED_BODY()
-};
-
-/**
- *
- */
 UENUM(BlueprintType)
 enum class EOxiSquadState : uint8
 {
@@ -65,4 +56,13 @@ protected:
 private:
 	UPROPERTY(Transient)
 	TArray<AOxiCharacter*> CurrentSquadMembers;
+};
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class OXI_API UOxiSquadAction : public UObject
+{
+	GENERATED_BODY()
 };
