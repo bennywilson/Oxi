@@ -22,7 +22,7 @@ UOxiAIManager* GetOxiAIManager(AActor* const WorldContextObject)
 /**
  *
  */
-AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector& TestPoint)
+AOxiCover* UOxiAIManager::FindNearestUnusedCover(const FVector& TestPoint)
 {
 	float ClosestCoverDist = FLT_MAX;
 	int ClosestCoverIdx = -1;
@@ -74,8 +74,7 @@ bool AOxiAICharacter::HasReachedDestination()
 AOxiCover* AOxiAICharacter::FindAndAcquireCover()
 {
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
-	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
-	AOxiCover* const NewCover = FindNearestUnusedCover(CoverList, GetActorLocation());
+	AOxiCover* const NewCover = AIMgr->FindNearestUnusedCover(GetActorLocation());
 	if (NewCover == nullptr)
 	{
 		return nullptr;

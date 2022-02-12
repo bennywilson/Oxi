@@ -31,13 +31,13 @@ struct FOxiAICommandData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	OxiAICommand AICommand;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* Target;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* Goal;
 };
 
@@ -87,18 +87,21 @@ public:
 	void UnregisterPlayer(AOxiFirstPersonCharacter* const Player);
 
 	const TArray<AOxiFirstPersonCharacter*> GetPlayerList() const { return PlayerList; }
+
+	UFUNCTION(BlueprintCallable)
+	AOxiCover* FindNearestUnusedCover(const FVector& TestPoint);
+
 	TArray<AOxiCover*> GetCoverList() const { return CoverList; }
 
-private:
+protected:
 	UPROPERTY(Transient)
 	TArray<AOxiFirstPersonCharacter*> PlayerList;
 
 	UPROPERTY(Transient)
 	TArray<AOxiSquad*> SquadList;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<AOxiCover*> CoverList;
 };
 
 extern UOxiAIManager * GetOxiAIManager(AActor* const WorldContextObject);
-extern AOxiCover* FindNearestUnusedCover(TArray<AOxiCover*> CoverList, const FVector& TestPoint);

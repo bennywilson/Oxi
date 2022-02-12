@@ -6,7 +6,6 @@
 #include "OxiCharacter.h"
 #include "OxiAIManager.h"
 #include "GameFramework/PhysicsVolume.h"
-#include "OxiSquad.h"
 #include "OxiAIVolumes.generated.h"
 
 /**
@@ -73,26 +72,6 @@ private:
 
 	UPROPERTY()
 	EAISpawnSquadTriggerCondition SpawnCondition;
-
-	// Volume which encompasses the battle field the squad is in.  If not specified, the trigger volume will be used
-	UPROPERTY(EditAnywhere)
-	AOxiBattlefieldVolume* BattlefieldVolume;
-
-	// Actions squad will take if the other lists are empty or their conditions haven't been met
-	UPROPERTY(EditAnywhere)
-	TArray<UOxiSquadAction*> DefaultSquadActions;
-
-	// Actions squad will take at the beginning of battle
-	UPROPERTY(EditAnywhere)
-	TArray<UOxiSquadAction*> InitialSquadActions;
-
-	// Actions squad will take when desperate (ex. losing the fight, low morale, etc)
-	UPROPERTY(EditAnywhere)
-	TArray<UOxiSquadAction*> DesperateSquadActions;
-
-	// Actions squad will take when winning (ex. player is hurt, high morale, etc)
-	UPROPERTY(EditAnywhere)
-	TArray<UOxiSquadAction*> ConfidentSquadActions;
 
 	UPROPERTY(Transient)
 	class AOxiSquad* Squad;

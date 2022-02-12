@@ -13,6 +13,7 @@
 	AOxiSquad::AOxiSquad()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	TargetsPositionRadius = 1000.0f;
 }
 
 /**
@@ -80,23 +81,18 @@ void AOxiSquad::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
-	if (SquadState != EOxiSquadState::Attack)
+	switch (SquadState)
 	{
-		TArray<AOxiFirstPersonCharacter*> PlayerList = AIMgr->GetPlayerList();
-		if (PlayerList.Num() > 0)
+		case EOxiSquadState::Idle :
 		{
-			AOxiFirstPersonCharacter* const Player = PlayerList[0];
-			for (int i = 0; i < CurrentSquadMembers.Num(); i++)
-			{
-				AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
-				if (PerceptionRadius <= 0.0f || FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
-				{
-					TArray<AOxiCharacter*> EnemyList;
-					EnemyList.Add(Player);
-					EnterAttackState(EnemyList);
-					break;
-				}
-			}
+			TickIdleState(DeltaTime); 
+			break;
+		}
+
+		case EOxiSquadState::Attack:
+		{
+			TickAttackState(DeltaTime);
+			break;
 		}
 	}
 }
@@ -104,53 +100,67 @@ void AOxiSquad::Tick(float DeltaTime)
 /**
  *
  */
-void AOxiSquad::EnterAttackState(TArray<AOxiCharacter *> EnemyList)
+void AOxiSquad::TickIdleState(const float DeltaTime)
 {
-	check(EnemyList.Num() > 0);
+	UOxiAIManager* AIMgr = GetOxiAIManager(this);
+	TArray<AOxiFirstPersonCharacter*> PlayerList = AIMgr->GetPlayerList();
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+
+	AOxiFirstPersonCharacter* const Player = PlayerList[0];
+	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+	{
+		AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
+		if (PerceptionRadius <= 0.0f || FVector::Dist(SquadMember->GetActorLocation(), Player->GetActorLocation()) <= PerceptionRadius)
+		{
+			SquadTargets.Empty();
+			FOxiSquadTarget NewTarget;
+			NewTarget.Character = Player;
+			NewTarget.Location = Player->GetActorLocation();
+			SquadTargets.Add(NewTarget);
+
+			EnterAttackState();
+			break;
+		}
+	}
+}
+
+/**
+ *
+ */
+void AOxiSquad::EnterAttackState()
+{
+	check(SquadTargets.Num() > 0);
+
+	if (DefaultSquadActions.Num() == 0)
+	{
+		return;
+	}
 
 	SquadState = EOxiSquadState::Attack;
 
+	TSubclassOf<UOxiSquadAction> SquadAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
+
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
-	if (CoverList.Num() == 0)
+	SquadAction.GetDefaultObject()->BeginAction(this, AIMgr);
+}
+
+/**
+ *
+ */
+void AOxiSquad::TickAttackState(const float DeltaTime)
+{
+	for (int i = 0; i < SquadTargets.Num(); i++)
 	{
-		FOxiAICommandData AICommandData;
-		AICommandData.AICommand = OxiAICommand::HoldPosition;
-		AICommandData.Target = EnemyList[0];
-
-		for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+		FOxiSquadTarget& CurTarget = SquadTargets[i];
+		if (FVector::Dist(CurTarget.Character->GetActorLocation(), CurTarget.Location) > TargetsPositionRadius)
 		{
-			AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[i]);
-			SquadMember->IssueAICommand(AICommandData);
-		}
-	}
+			EnterAttackState();
+			break;
 
-	for (int iSquad = 0; iSquad < CurrentSquadMembers.Num(); iSquad++)
-	{
-		AOxiAICharacter* const SquadMember = Cast<AOxiAICharacter>(CurrentSquadMembers[iSquad]);
-
-		AOxiCover* const NearestCover = FindNearestUnusedCover(CoverList, SquadMember->GetActorLocation());
-		if (NearestCover == nullptr)
-		{
-			// Hold current position
-			FOxiAICommandData AICommandData;
-			AICommandData.AICommand = OxiAICommand::HoldPosition;
-			AICommandData.Target = EnemyList[0];
-			AICommandData.Goal = nullptr;
-			SquadMember->IssueAICommand(AICommandData);
-		}
-		else
-		{
-			// Take Cover
-			FOxiAICommandData AICommandData;
-			AICommandData.AICommand = OxiAICommand::TakeCover;
-			AICommandData.Target = EnemyList[0];
-			AICommandData.Goal = NearestCover;
-
-			CoverList.Remove(NearestCover);
-
-			SquadMember->AcquireCover(NearestCover);	// TODO - put inside of blueprint
-			SquadMember->IssueAICommand(AICommandData);
 		}
 	}
 }
