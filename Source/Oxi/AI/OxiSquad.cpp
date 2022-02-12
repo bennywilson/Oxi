@@ -141,7 +141,15 @@ void AOxiSquad::EnterAttackState()
 
 	SquadState = EOxiSquadState::Attack;
 
-	TSubclassOf<UOxiSquadAction> SquadAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
+	TSubclassOf<UOxiSquadAction> SquadAction;
+	if (DebugAction.Get() != nullptr)
+	{
+		SquadAction = DebugAction;
+	}
+	else
+	{
+		SquadAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
+	}
 
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();

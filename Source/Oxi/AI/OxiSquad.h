@@ -91,6 +91,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadonly)
 	TArray<AOxiCharacter*> CurrentSquadMembers;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UOxiSquadAction> DebugAction;
 };
 
 /**
@@ -103,5 +106,5 @@ class OXI_API UOxiSquadAction : public UObject
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void BeginAction(AOxiSquad*  OxiSquad, UOxiAIManager*  AIManager);
+	void BeginAction(AOxiSquad* OxiSquad, UOxiAIManager*  AIManager);
 };
