@@ -141,19 +141,18 @@ void AOxiSquad::EnterAttackState()
 
 	SquadState = EOxiSquadState::Attack;
 
-	TSubclassOf<UOxiSquadAction> SquadAction;
+	TSubclassOf<UOxiSquadAction> DesiredAction;
 	if (DebugAction.Get() != nullptr)
 	{
-		SquadAction = DebugAction;
+		DesiredAction = DebugAction;
 	}
 	else
 	{
-		SquadAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
+		DesiredAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
 	}
 
-	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
-	TArray<AOxiCover*> CoverList = AIMgr->GetCoverList();
-	SquadAction.GetDefaultObject()->BeginAction(this, AIMgr);
+	CurrentAction = NewObject<UOxiSquadAction>(this, DesiredAction);
+	CurrentAction->StartAction(this);
 }
 
 /**
@@ -167,10 +166,12 @@ void AOxiSquad::TickAttackState(const float DeltaTime)
 		if (FVector::Dist(CurTarget.Character->GetActorLocation(), CurTarget.Location) > TargetsPositionRadius)
 		{
 			EnterAttackState();
-			break;
-
+			return;
 		}
 	}
+
+	check(CurrentAction != nullptr);
+	CurrentAction->TickAction(DeltaTime);
 }
 
 /**

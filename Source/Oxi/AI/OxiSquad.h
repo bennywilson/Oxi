@@ -94,6 +94,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOxiSquadAction> DebugAction;
+
+	UPROPERTY(Transient)
+	UOxiSquadAction* CurrentAction;
 };
 
 /**
@@ -105,6 +108,10 @@ class OXI_API UOxiSquadAction : public UObject
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void BeginAction(AOxiSquad* OxiSquad, UOxiAIManager*  AIManager);
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartAction(AOxiSquad* OxiSquad);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void TickAction(const float DeltaTime);
+
 };
