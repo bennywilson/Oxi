@@ -95,9 +95,30 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 	// Knock individual bodies off
 	if (DamageInfo.HitBoneName != NAME_None)
 	{
-		DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
-		FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
-		DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+		if (HideBodiesWhenKnockedOff)
+		{
+//			DestructibleMeshComponent->HideBoneByName(DamageInfo.HitBoneName, EPhysBodyOp::PBO_None);
+
+			DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
+			FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
+			DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+		}
+		else
+		{
+			DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
+			FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
+			DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+		}
+
+		if (BodyKnockOffFX.Num() > 0)
+		{
+			const int fxIdx = FMath::RandRange(0, BodyKnockOffFX.Num() - 1);
+			auto fxToPlay = BodyKnockOffFX[fxIdx];
+			if (fxToPlay != nullptr)
+			{
+				GetWorld()->SpawnActor(fxToPlay, &GetComponentTransform());
+			}
+		}
 		NumBrokenPieces++;
 	}
 

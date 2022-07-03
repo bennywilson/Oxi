@@ -89,6 +89,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
 	float ExplosionLightDurationSec;
 
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
+	TArray<TSubclassOf<AActor>> BodyKnockOffFX;
+
+	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
+	bool HideBodiesWhenKnockedOff;
+
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
 	float ThresholdToShowDamagedMeshAt;
 
