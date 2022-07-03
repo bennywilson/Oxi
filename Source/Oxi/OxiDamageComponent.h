@@ -29,6 +29,9 @@ struct FOxiDamageInfo
 	FVector DamageLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector ImpactNormal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* DamageCauser;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

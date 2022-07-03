@@ -116,7 +116,10 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 			auto fxToPlay = BodyKnockOffFX[fxIdx];
 			if (fxToPlay != nullptr)
 			{
-				GetWorld()->SpawnActor(fxToPlay, &GetComponentTransform());
+				FTransform damageLoc;
+				damageLoc.SetLocation(DamageInfo.DamageLocation);
+				damageLoc.SetRotation(DamageInfo.ImpactNormal.ToOrientationQuat());
+				GetWorld()->SpawnActor(fxToPlay, &damageLoc);
 			}
 		}
 		NumBrokenPieces++;
