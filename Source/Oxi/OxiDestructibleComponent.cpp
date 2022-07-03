@@ -97,11 +97,11 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 	{
 		if (HideBodiesWhenKnockedOff)
 		{
-//			DestructibleMeshComponent->HideBoneByName(DamageInfo.HitBoneName, EPhysBodyOp::PBO_None);
+			DestructibleMeshComponent->HideBoneByName(DamageInfo.HitBoneName, EPhysBodyOp::PBO_None);
 
-			DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
-			FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
-			DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
+//			DestructibleMeshComponent->SetAllBodiesBelowSimulatePhysics(DamageInfo.HitBoneName, true, true);
+	//		FVector ImpulseDir = (DamageInfo.DamageLocation - DestructibleMeshComponent->Bounds.Origin).GetSafeNormal() * DamageInfo.DamageXYImpulse;
+		//	DestructibleMeshComponent->AddImpulseToAllBodiesBelow(ImpulseDir, DamageInfo.HitBoneName, true, true);
 		}
 		else
 		{
