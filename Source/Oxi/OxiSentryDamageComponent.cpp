@@ -19,6 +19,7 @@ void UOxiSentryDamageComponent::BeginPlay()
 		{
 			continue;
 		}
+		/*
 		SkelMesh->SetSimulatePhysics(false);
 		SkelMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		SkelMesh->SetAllBodiesPhysicsBlendWeight(0.f);*/
