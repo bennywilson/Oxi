@@ -5,6 +5,8 @@
 #include "OxiCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
+DEFINE_LOG_CATEGORY(LogOxiCombat);
+
 UCombatManager* UCombatManager::Instance = nullptr;
 
 UCombatManager::UCombatManager()
@@ -29,7 +31,7 @@ void UCombatManager::TriggerDeathEvent(class UOxiDamageComponent* Victim, UOxiDa
 {
 	if (Instance == nullptr)
 	{
-		UE_LOG(LogCombat, Log, TEXT("UCombatManager::UnregisterEventListener() - NULL combat manager."));
+		UE_LOG(LogOxiCombat, Log, TEXT("UCombatManager::UnregisterEventListener() - NULL combat manager."));
 		return;
 	}
 

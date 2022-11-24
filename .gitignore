@@ -75,3 +75,8 @@ DerivedDataCache/*
 
 !*.usf
 !*.ush
+lfs/objects/d7/32/d732d44ba13e86e3988b0bde0e3b3d413d99542c7f552e69d7c89ac321de4746
+hooks/pre-push
+hooks/post-merge
+hooks/post-commit
+hooks/post-checkout

@@ -6,8 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "OxiGameMode.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogOxiCombat, Warning, All);
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCharacterDeath, class UOxiDamageComponent*, UOxiDamageComponent*)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCharacterDeath, class UOxiDamageComponent*, class UOxiDamageComponent*)
 typedef FOnCharacterDeath::FDelegate FOnCharacterDeathDelegate;
 
 UCLASS(Config = Engine)
@@ -26,13 +27,13 @@ public:
 	{
 		if (InUserObject == nullptr)
 		{
-			UE_LOG(LogCombat, Log, TEXT("UCombatManager::RegisterEventListener() - NULL InUseObject. InFunctionName = %s"), *InUserObject->GetFullName(), *InFunctionName.ToString());
+			UE_LOG(LogOxiCombat, Log, TEXT("UCombatManager::RegisterEventListener() - NULL InUseObject. InFunctionName = %s"), *InUserObject->GetFullName(), *InFunctionName.ToString());
 			return FDelegateHandle();
 		}
 
 		if (Instance == nullptr)
 		{
-			UE_LOG(LogCombat, Log, TEXT("UCombatManager::RegisterEventListener() - NULL combat manager.  InUserObject = %s.  InFunctionName = %s"), *InUserObject->GetFullName(), *InFunctionName.ToString());
+			UE_LOG(LogOxiCombat, Log, TEXT("UCombatManager::RegisterEventListener() - NULL combat manager.  InUserObject = %s.  InFunctionName = %s"), *InUserObject->GetFullName(), *InFunctionName.ToString());
 			return FDelegateHandle();
 		}
 		return Instance->CharacterDeathDelegates.AddUFunction(InUserObject, InFunctionName);
@@ -42,7 +43,7 @@ public:
 	{
 		if (Instance == nullptr)
 		{
-			UE_LOG(LogCombat, Log, TEXT("UCombatManager::UnregisterEventListener() - NULL combat manager."));
+			UE_LOG(LogOxiCombat, Log, TEXT("UCombatManager::UnregisterEventListener() - NULL combat manager."));
 			return;
 		}
 

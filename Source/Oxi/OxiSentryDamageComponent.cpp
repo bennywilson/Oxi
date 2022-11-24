@@ -19,10 +19,9 @@ void UOxiSentryDamageComponent::BeginPlay()
 		{
 			continue;
 		}
-
 		SkelMesh->SetSimulatePhysics(false);
 		SkelMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		SkelMesh->SetAllBodiesPhysicsBlendWeight(0.f);
+		SkelMesh->SetAllBodiesPhysicsBlendWeight(0.f);*/
 	}
 
 	LastClipTime = -999999.0f;
@@ -100,7 +99,7 @@ void UOxiSentryDamageComponent::TickComponent(float DeltaTime, enum ELevelTick T
 
 
 float UOxiSentryDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
-{
+{/*
 	Super::TakeDamage_Internal(DamageInfo);
 	
 	float DamageAmount = DamageInfo.DamageAmount;
@@ -260,7 +259,7 @@ float UOxiSentryDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 				AnimInstance->PlayHitReaction(DamageInfo.DamageAmount, DamageInfo.DamageLocation, DamageInfo.DamageCauser, bCanClipBone, bBoneClipped);
 			}
 		}
-	}
+	}*/
 	return 0.f;
 }
 
