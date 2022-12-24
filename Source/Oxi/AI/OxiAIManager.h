@@ -14,7 +14,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogOxiAI, Warning, All);
  *
  */
 UENUM(BlueprintType)
-enum class OxiAICommand : uint8
+enum class EOxiAICommand : uint8
 {
 	None,
 	TakeCover,
@@ -32,7 +32,7 @@ struct FOxiAICommandData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	OxiAICommand AICommand;
+	EOxiAICommand AICommand;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* Target;

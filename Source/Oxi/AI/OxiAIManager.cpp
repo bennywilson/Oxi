@@ -100,7 +100,7 @@ void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxi
 		{
 			// Take Cover
 			FOxiAICommandData AICommandData;
-			AICommandData.AICommand = OxiAICommand::TakeCover;
+			AICommandData.AICommand = EOxiAICommand::TakeCover;
 			AICommandData.Target = CurrentAICommand.Target;
 			AICommandData.Goal = NearestCover;
 
@@ -108,8 +108,6 @@ void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxi
 		}
 	}
 }
-
- 
 
 /**
  * 

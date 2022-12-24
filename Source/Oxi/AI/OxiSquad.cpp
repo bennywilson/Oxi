@@ -6,6 +6,16 @@
 #include "OxiHumanDamageComponent.h"
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "DrawDebugHelpers.h"
+
+/** Whether to allow preshadows (static world casting on character), can be disabled for debugging. */
+static TAutoConsoleVariable<int32> CVarSquadDebug(
+	TEXT("oxi.squaddebug"),
+	0,
+	TEXT("Show debug squad indo"),
+	ECVF_Cheat
+);
+
 
 /**
   * 
@@ -95,6 +105,17 @@ void AOxiSquad::Tick(float DeltaTime)
 			break;
 		}
 	}
+
+	if (CVarSquadDebug.GetValueOnGameThread())
+	{
+		for (int i = 0; i < SquadTargets.Num(); i++)
+		{
+			const FOxiSquadTarget& curSquadTarget = SquadTargets[i];
+			const FMatrix debugMatrix(FVector::UpVector, FVector::ForwardVector, FVector::LeftVector, curSquadTarget.Location);
+
+			DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
+		}
+	}
 }
 
 /**
@@ -163,10 +184,17 @@ void AOxiSquad::TickAttackState(const float DeltaTime)
 	for (int i = 0; i < SquadTargets.Num(); i++)
 	{
 		FOxiSquadTarget& CurTarget = SquadTargets[i];
-		if (FVector::Dist(CurTarget.Character->GetActorLocation(), CurTarget.Location) > TargetsPositionRadius)
+		const FVector ActorsLocation = CurTarget.Character->GetActorLocation();
+		if (FVector::Dist(ActorsLocation, CurTarget.Location) > TargetsPositionRadius)
 		{
-			EnterAttackState();
-			return;
+			const FVector OldPosition = CurTarget.Location;
+			CurTarget.Location = ActorsLocation;
+			TargetChangedPositionEvent(CurTarget, OldPosition);
+			if (SquadState != EOxiSquadState::Attack)
+			{
+				return;
+			}
+			break;
 		}
 	}
 

@@ -60,6 +60,10 @@ private:
 	void TickIdleState(const float DeltaTIme);
 
 protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void TargetChangedPositionEvent(const FOxiSquadTarget& Target, const FVector oldPosition);
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiSquadState SquadState;
 
@@ -113,5 +117,4 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void TickAction(const float DeltaTime);
-
 };
