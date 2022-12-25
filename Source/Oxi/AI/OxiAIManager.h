@@ -104,4 +104,4 @@ protected:
 	TArray<AOxiCover*> CoverList;
 };
 
-extern UOxiAIManager * GetOxiAIManager(AActor* const WorldContextObject);
+extern UOxiAIManager * GetOxiAIManager(UObject* const WorldContextObject);

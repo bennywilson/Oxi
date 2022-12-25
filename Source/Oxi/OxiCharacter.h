@@ -64,6 +64,9 @@ public:
 
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) { }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void DebugDraw(const int debugLevel);
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDeath_Internal(UOxiHumanDamageComponent* DamageComp, AActor* Victim, AActor* Killer);

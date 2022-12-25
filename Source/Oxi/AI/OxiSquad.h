@@ -60,10 +60,6 @@ private:
 	void TickIdleState(const float DeltaTIme);
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent)
-	void TargetChangedPositionEvent(const FOxiSquadTarget& Target, const FVector oldPosition);
-
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiSquadState SquadState;
 
@@ -99,7 +95,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOxiSquadAction> DebugAction;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	UOxiSquadAction* CurrentAction;
 };
 
@@ -117,4 +113,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void TickAction(const float DeltaTime);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTargetChangedPosition(const FOxiSquadTarget& Target, const FVector oldPosition);
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void GetCoverInRadius(TArray<AOxiCover*> OutCoverList, const FVector& TestPoint, const float radius);
 };

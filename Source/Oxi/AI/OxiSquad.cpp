@@ -18,9 +18,9 @@ static TAutoConsoleVariable<int32> CVarSquadDebug(
 
 
 /**
-  * 
-  */
-	AOxiSquad::AOxiSquad()
+ * 
+ */
+AOxiSquad::AOxiSquad()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	TargetsPositionRadius = 1000.0f;
@@ -106,14 +106,26 @@ void AOxiSquad::Tick(float DeltaTime)
 		}
 	}
 
-	if (CVarSquadDebug.GetValueOnGameThread())
+	const int debugSquadLevel = CVarSquadDebug.GetValueOnGameThread();
+	if (debugSquadLevel)
 	{
-		for (int i = 0; i < SquadTargets.Num(); i++)
+		if (debugSquadLevel == 1 || debugSquadLevel == 2)
 		{
-			const FOxiSquadTarget& curSquadTarget = SquadTargets[i];
-			const FMatrix debugMatrix(FVector::UpVector, FVector::ForwardVector, FVector::LeftVector, curSquadTarget.Location);
+			for (int i = 0; i < SquadTargets.Num(); i++)
+			{
+				const FOxiSquadTarget& curSquadTarget = SquadTargets[i];
+				const FMatrix debugMatrix(FVector::UpVector, FVector::ForwardVector, FVector::LeftVector, curSquadTarget.Location);
 
-			DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
+				DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
+			}
+		}
+
+		if (debugSquadLevel == 1 || debugSquadLevel == 3)
+		{
+			for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+			{
+				CurrentSquadMembers[i]->DebugDraw(debugSquadLevel);
+			}
 		}
 	}
 }
@@ -188,12 +200,8 @@ void AOxiSquad::TickAttackState(const float DeltaTime)
 		if (FVector::Dist(ActorsLocation, CurTarget.Location) > TargetsPositionRadius)
 		{
 			const FVector OldPosition = CurTarget.Location;
-			CurTarget.Location = ActorsLocation;
-			TargetChangedPositionEvent(CurTarget, OldPosition);
-			if (SquadState != EOxiSquadState::Attack)
-			{
-				return;
-			}
+			CurTarget.Location = ActorsLocation;			
+			CurrentAction->OnTargetChangedPosition(CurTarget, OldPosition);
 			break;
 		}
 	}
@@ -220,4 +228,13 @@ int AOxiSquad::GetNumAliveSquadMembers() const
 	}
 
 	return NumAlive;
+}
+
+/**
+ *
+ */
+void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*> OutCoverList, const FVector& TestPoint, const float radius)
+{
+	UOxiAIManager* const OxiMgr = GetOxiAIManager(this);
+	OutCoverList = OxiMgr->GetCoverList();
 }

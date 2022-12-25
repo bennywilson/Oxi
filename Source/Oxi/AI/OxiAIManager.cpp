@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY(LogOxiAI);
 /**
  *
  */
-UOxiAIManager* GetOxiAIManager(AActor* const WorldContextObject)
+UOxiAIManager* GetOxiAIManager(UObject* const WorldContextObject)
 {
 	UGameInstance* const GameInst = UGameplayStatics::GetGameInstance(WorldContextObject);
 	check(GameInst);
