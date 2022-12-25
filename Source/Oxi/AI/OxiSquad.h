@@ -119,5 +119,5 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable)
-	void GetCoverInRadius(TArray<AOxiCover*> OutCoverList, const FVector& TestPoint, const float radius);
+	void GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius);
 };

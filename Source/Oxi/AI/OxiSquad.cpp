@@ -233,7 +233,7 @@ int AOxiSquad::GetNumAliveSquadMembers() const
 /**
  *
  */
-void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*> OutCoverList, const FVector& TestPoint, const float radius)
+void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius)
 {
 	UOxiAIManager* const OxiMgr = GetOxiAIManager(this);
 	OutCoverList = OxiMgr->GetCoverList();

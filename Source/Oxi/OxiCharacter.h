@@ -59,13 +59,19 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION(BlueprintCallable)
 	bool AcquireCover(AOxiCover* const Cover);
+
+	UFUNCTION(BlueprintCallable)
 	void ReleaseCover();
 
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) { }
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DebugDraw(const int debugLevel);
+
+	UFUNCTION(BlueprintCallable)
+	AOxiCover* GetCurrentCover() const { return CurrentCover; }
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
