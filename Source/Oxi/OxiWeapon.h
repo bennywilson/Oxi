@@ -29,7 +29,7 @@ public:
 	AOxiWeapon();
 	
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Animations")
-	bool StartFireWeapon(const UCameraComponent* const FirstPersonCameraComponent, const bool bIsOutline);
+	bool StartFireWeapon(const UCameraComponent* const FirstPersonCameraComponent, const bool bIsOutline, const FVector TargetLocation);
 
 protected:
 
