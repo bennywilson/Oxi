@@ -2,6 +2,8 @@
 
 #include "OxiDamageComponent.h"
 
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDamageComponentOnDeath, UOxiDamageComponent* const, class AActor* const, class AActor* const);
+
 UOxiDamageComponent::UOxiDamageComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -60,4 +62,10 @@ void UOxiDamageComponent::DisableRagdoll()
 	}
 
 	GetOwner()->GetWorldTimerManager().ClearTimer(RagdollSleepTimerHandle);
+}
+
+void UOxiDamageComponent::BroadcastDeath()
+{
+//	void OnDeath() const;
+
 }

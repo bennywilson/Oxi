@@ -7,6 +7,8 @@
 #include "TimerManager.h"
 #include "OxiDamageComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDamageComponentOnDeath, UOxiDamageComponent* const, class AActor* const, class AActor* const);
+
 UENUM(BlueprintType)
 enum EOxiDamageType
 {
@@ -116,6 +118,9 @@ class OXI_API UOxiDamageComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
+
+	FDamageComponentOnDeath OnDeath;
+
 	// Sets default values for this component's properties
 	UOxiDamageComponent();
 
@@ -132,7 +137,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	// IOxiDamageInterface
+	void BroadcastDeath();
+
 protected:
 	
 	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) { return 0.0f; }
@@ -144,7 +150,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float BaseHealth;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	float CurrentHealth;
 
 	UPROPERTY(Transient)

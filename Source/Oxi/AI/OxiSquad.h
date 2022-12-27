@@ -53,7 +53,7 @@ public:
 	int GetNumAliveSquadMembers() const;
 
 private:
-	void SquadMemberKilledCB(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
+	void SquadMemberKilledCB(UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState();
 	void TickAttackState(const float DeltaTime);
 

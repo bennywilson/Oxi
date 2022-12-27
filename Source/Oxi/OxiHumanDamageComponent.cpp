@@ -274,7 +274,7 @@ float UOxiPlayerDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 
 	if (CurrentHealth <= 0.0f)
 	{
-
+		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
 
 	LastDamageTime = GetWorld()->GetTimeSeconds();
@@ -295,7 +295,7 @@ void UOxiPlayerDamageComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	}
 
 	const float curTime = GetWorld()->GetTimeSeconds();
-	if (CurrentHealth < BaseHealth && HealthRegenRate > 0.0f)
+	if (CurrentHealth > 0 && CurrentHealth < BaseHealth && HealthRegenRate > 0.0f)
 	{
 		if (curTime > LastDamageTime + SecondsUntilHealthRegen)
 		{

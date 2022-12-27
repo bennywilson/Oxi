@@ -44,14 +44,14 @@ void AOxiCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
+	UOxiDamageComponent* const DamageComp = Cast<UOxiDamageComponent>(GetComponentByClass(UOxiDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
 	{
 		DamageComp->OnDeath.AddUObject(this, &AOxiCharacter::OnDeath);
 	}
 }
 
-/**
+/**x
  *
  */
 void AOxiCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -71,9 +71,9 @@ void AOxiCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 /**
  *
  */
-void AOxiCharacter::OnDeath(UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
+void AOxiCharacter::OnDeath(UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
 {
-	OnDeath_Internal(DamageComp, Victim, Killer);
+	OnDeath_Internal(Cast<UOxiHumanDamageComponent>(DamageComp), Victim, Killer);
 
 	check(DamageComp);
 	DamageComp->OnDeath.RemoveAll(this);
@@ -306,6 +306,18 @@ float AOxiFirstPersonCharacter::TakeDamage_Internal(const FOxiDamageInfo& Damage
 		OxiPulseLightList[i]->SetLightColor(CurBloodColor);
 	}
 	return 0.f;
+}
+
+void AOxiFirstPersonCharacter::OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer)
+{
+	//Super::OnDeath(DamageComp, Victim, Killer);
+	Super::OnDeath_Internal(DamageComp, Victim, Killer);
+	GetCharacterMovement()->SetActive(false);
+	GetController()->SetIgnoreMoveInput(true);
+	GetController()->SetIgnoreLookInput(true);
+
+	OnDeath_Internal(Cast<UOxiHumanDamageComponent>(DamageComp), Victim, Killer);
+
 }
 
 void AOxiFirstPersonCharacter::OnCharacterDeathEvent(UOxiDamageComponent* Victim, UOxiDamageComponent* Killer)

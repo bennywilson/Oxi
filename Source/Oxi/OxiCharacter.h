@@ -75,11 +75,11 @@ public:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnDeath_Internal(UOxiHumanDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
+	void OnDeath_Internal(UOxiDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
 
 private:
 
-	virtual void OnDeath(class UOxiHumanDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
+	virtual void OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 
 	UPROPERTY(Transient)
 	AOxiCover* CurrentCover;
@@ -113,6 +113,8 @@ protected:
 	void MoveRight(float Val);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+
+	virtual void OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	class USkeletalMeshComponent* Mesh1P;
