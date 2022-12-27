@@ -1,8 +1,14 @@
 // ELP 2021
 
 #include "OxiHumanDamageComponent.h"
+#include "OxiCharacter.h"
 #include "TimerManager.h"
+#include "Engine/PostProcessVolume.h"
+#include "Kismet/KismetMaterialLibrary.h"
 
+/**
+ *
+ */ 
 void UOxiHumanDamageComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -24,6 +30,9 @@ void UOxiHumanDamageComponent::BeginPlay()
 	}
 }
 
+/**
+ *
+ */
 float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
 	Super::TakeDamage_Internal(DamageInfo);
@@ -214,4 +223,87 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
 	return 0.f;
+}
+
+/**
+ *
+ */
+void UOxiPlayerDamageComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	for (IInterface_PostProcessVolume* PPVolume : GetWorld()->PostProcessVolumes)
+	{
+		APostProcessVolume* const curVol = Cast<APostProcessVolume>(PPVolume);
+		if (curVol == nullptr)
+		{
+			continue;
+		}
+
+		FPostProcessSettings& ppSettings = curVol->Settings;
+
+		for (FWeightedBlendable& weightedBlendable : ppSettings.WeightedBlendables.Array)
+		{
+			UMaterialInstance* const MatInst = Cast<UMaterialInstance>(weightedBlendable.Object);
+			if (MatInst == nullptr)
+			{
+				continue;
+			}
+
+			if (MatInst->GetName().Contains("PlayerDamage_PP_Inst"))
+			{
+				PlayerDamagePP_MatInst = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, MatInst);
+				weightedBlendable.Object = PlayerDamagePP_MatInst;//TObjectPtr<UObject>(PlayerDamagePP_MatInst);
+				continue;
+			}
+		}
+	}
+}
+
+/**
+ *
+ */
+float UOxiPlayerDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+{
+	if (CurrentHealth <= 0)
+	{
+		return 0.0f;
+	}
+
+	CurrentHealth -= DamageInfo.DamageAmount;
+
+	if (CurrentHealth <= 0.0f)
+	{
+
+	}
+
+	LastDamageTime = GetWorld()->GetTimeSeconds();
+	return 0.0f;
+}
+
+/**
+ *
+ */
+void UOxiPlayerDamageComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	const float ScreenBloodIntensity = FMath::Clamp((BaseHealth - CurrentHealth) / (BaseHealth * 0.9f), 0.0f, 1.0f);// * 0.5f + 0.5f;
+	if (PlayerDamagePP_MatInst != nullptr)
+	{
+		PlayerDamagePP_MatInst->SetScalarParameterValue("FXIntensity", ScreenBloodIntensity);
+	}
+
+	const float curTime = GetWorld()->GetTimeSeconds();
+	if (CurrentHealth < BaseHealth && HealthRegenRate > 0.0f)
+	{
+		if (curTime > LastDamageTime + SecondsUntilHealthRegen)
+		{
+			CurrentHealth = CurrentHealth + HealthRegenRate * DeltaTime;
+			if (CurrentHealth > BaseHealth)
+			{
+				CurrentHealth = BaseHealth;
+			}
+		}
+	}
 }

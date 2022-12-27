@@ -29,7 +29,7 @@ public:
 	AOxiWeapon();
 	
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Animations")
-	bool StartFireWeapon(const UCameraComponent* const FirstPersonCameraComponent, const bool bIsOutline, const FVector TargetLocation);
+	bool StartFireWeapon(const UCameraComponent* const FirstPersonCameraComponent, const bool bIsOutline, const FVector VecToTarget, const float SpreadMultiplier, const AOxiCharacter* const WeaponOwner);
 
 protected:
 
@@ -41,4 +41,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int CurrentAmmoCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	float WeaponDamage;
 };
