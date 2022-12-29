@@ -174,6 +174,11 @@ void AOxiFirstPersonCharacter::BeginPlay()
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	AIMgr->RegisterPlayer(this);
 
+	UOxiDamageComponent* const DamageComp = Cast<UOxiDamageComponent>(GetComponentByClass(UOxiDamageComponent::StaticClass()));
+	if (DamageComp != nullptr)
+	{
+		DamageComp->OnTakeDamage.AddUObject(this, &AOxiFirstPersonCharacter::DamageTakenCB);
+	}
 }
 
 /**

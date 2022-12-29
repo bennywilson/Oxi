@@ -175,6 +175,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Weapon")
 	bool StartFireWeapon(const UCameraComponent* const CameraComp1P);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void DamageTakenCB(UOxiDamageComponent* InDamageComponent, AActor* Victim, AActor* DamageCauser);
+
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 private:

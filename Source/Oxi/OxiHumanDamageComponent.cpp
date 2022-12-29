@@ -282,6 +282,8 @@ float UOxiPlayerDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
 
+	OnTakeDamage.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
+
 	LastDamageTime = GetWorld()->GetTimeSeconds();
 	return 0.0f;
 }

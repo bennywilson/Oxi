@@ -8,6 +8,7 @@
 #include "OxiDamageComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FDamageComponentOnDeath, UOxiDamageComponent* const, class AActor* const, class AActor* const);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDamageComponentOnTakeDamage, UOxiDamageComponent* const, class AActor* const, class AActor* const);
 
 UENUM(BlueprintType)
 enum EOxiDamageType
@@ -120,6 +121,7 @@ class OXI_API UOxiDamageComponent : public USceneComponent
 public:
 
 	FDamageComponentOnDeath OnDeath;
+	FDamageComponentOnTakeDamage OnTakeDamage;
 
 	// Sets default values for this component's properties
 	UOxiDamageComponent();
