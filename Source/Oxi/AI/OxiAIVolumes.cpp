@@ -74,6 +74,14 @@ void AOxiAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
 		return;
 	}
 
+	ActivateSpawnSquadTrigger();
+}
+
+/**
+ *
+ */
+void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
+{
 	if (SquadTypes.Num() == 0)
 	{
 		UE_LOG(LogOxiAI, Warning, TEXT("AAISpawnSquadTrigger::ActorEnteredVolume() - Volume %s doesn't have any squad types"), *GetFullName());

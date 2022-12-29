@@ -62,6 +62,9 @@ class OXI_API AOxiAISpawnSquadTrigger : public APhysicsVolume
 	
 	virtual void ActorEnteredVolume(class AActor* Other) override;
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateSpawnSquadTrigger();
+
 private:
 
 	UPROPERTY(EditAnywhere)

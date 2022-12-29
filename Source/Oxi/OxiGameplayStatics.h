@@ -14,4 +14,6 @@ class OXI_API UOxiGameplayStatics : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	
+	UFUNCTION(BlueprintCallable)
+	static void PrintMessageToConsole(const FString& Msg);
 };
