@@ -8,7 +8,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "DrawDebugHelpers.h"
 
-/** Whether to allow preshadows (static world casting on character), can be disabled for debugging. */
+/** Toggles onscreen AI debugging information */
 static TAutoConsoleVariable<int32> CVarSquadDebug(
 	TEXT("oxi.squaddebug"),
 	0,

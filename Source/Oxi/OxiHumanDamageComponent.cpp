@@ -6,6 +6,14 @@
 #include "Engine/PostProcessVolume.h"
 #include "Kismet/KismetMaterialLibrary.h"
 
+/** Toggles god mode */
+static TAutoConsoleVariable<int32> CVarGodMode(
+	TEXT("oxi.god"),
+	0,
+	TEXT("Toggles god mode"),
+	ECVF_Cheat
+);
+
 /**
  *
  */ 
@@ -37,8 +45,20 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 {
 	Super::TakeDamage_Internal(DamageInfo);
 
+UE_LOG(LogTemp, Log, TEXT("Hit Bone %s"), *DamageInfo.HitBoneName.ToString());
+
+	float DamageAmount = DamageInfo.DamageAmount;
+	AOxiCharacter* Victim = Cast<AOxiCharacter>(GetOwner());
+	if (Victim != nullptr)
+	{
+		const float* const damageMultiplier = Victim->GetHitBoneToDamageMultiplier().Find(DamageInfo.HitBoneName);
+		if (damageMultiplier != nullptr)
+		{
+			DamageAmount *= *damageMultiplier;
+		}
+	}
 	const float OldHealth = CurrentHealth;
-	CurrentHealth -= DamageInfo.DamageAmount;
+	CurrentHealth -= DamageAmount;
 	bool bJustKilled = (OldHealth > 0 && CurrentHealth <= 0);
 
 	const float UnpausedTimeSec = GetWorld()->GetUnpausedTimeSeconds();
@@ -83,144 +103,148 @@ float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& Damage
 			}
 		}
 	}
-	for (int i = 0; i < SkeletalMeshes.Num(); i++)
+
+	if (bJustKilled)
 	{
-		USkeletalMeshComponent* const SkelMesh = SkeletalMeshes[i];
-
-		if (bAddedWound == false && WoundInstances.Num() < 1)
+		for (int i = 0; i < SkeletalMeshes.Num(); i++)
 		{
-			bAddedWound = true;
-			for (int iWoundSearch = 0; iWoundSearch < WoundData.Num(); iWoundSearch++)
+			USkeletalMeshComponent* const SkelMesh = SkeletalMeshes[i];
+
+			if (bAddedWound == false && WoundInstances.Num() < 1)
 			{
-				const FWoundData& CurWoundData = WoundData[iWoundSearch];
-
-				static const FName AnyBone = { "Any" };
-				if (CurWoundData.BoneName == AnyBone || CurWoundData.BoneName == DamageInfo.HitBoneName)
+				bAddedWound = true;
+				for (int iWoundSearch = 0; iWoundSearch < WoundData.Num(); iWoundSearch++)
 				{
-					FWoundInstance WoundInfo;
-					WoundInfo.BoneName = DamageInfo.HitBoneName;
-					WoundInfo.WoundIndex = iWoundSearch;
-					WoundInfo.HitLocation = SkelMesh->GetBoneLocation(DamageInfo.HitBoneName, EBoneSpaces::ComponentSpace);
-					WoundInfo.HitTime = UnpausedTimeSec;
-					WoundInstances.Add(WoundInfo);
-					bAddedWound = true;
+					const FWoundData& CurWoundData = WoundData[iWoundSearch];
 
-					const FWoundFXData& WoundFX = CurWoundData.WoundFX;
-					if (WoundFX.AttachSocket != NAME_None && WoundFX.DismembermentFX != nullptr)
+					static const FName AnyBone = { "Any" };
+					if (CurWoundData.BoneName == AnyBone || CurWoundData.BoneName == DamageInfo.HitBoneName)
 					{
-						AActor* const FXActor = GetWorld()->SpawnActor(WoundFX.DismembermentFX, &GetComponentTransform());
-						FXActor->AttachToComponent(SkelMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, WoundFX.AttachSocket);
+						FWoundInstance WoundInfo;
+						WoundInfo.BoneName = DamageInfo.HitBoneName;
+						WoundInfo.WoundIndex = iWoundSearch;
+						WoundInfo.HitLocation = SkelMesh->GetBoneLocation(DamageInfo.HitBoneName, EBoneSpaces::ComponentSpace);
+						WoundInfo.HitTime = UnpausedTimeSec;
+						WoundInstances.Add(WoundInfo);
+						bAddedWound = true;
 
-						for (int iComponentName = 0; iComponentName < WoundFX.TagsOfComponentsToEnable.Num(); iComponentName++)
+						const FWoundFXData& WoundFX = CurWoundData.WoundFX;
+						if (WoundFX.AttachSocket != NAME_None && WoundFX.DismembermentFX != nullptr)
 						{
-							const FName ComponentTag = WoundFX.TagsOfComponentsToEnable[iComponentName];
-							if (ComponentTag == NAME_None)
-							{
-								continue;
-							}
+							AActor* const FXActor = GetWorld()->SpawnActor(WoundFX.DismembermentFX, &GetComponentTransform());
+							FXActor->AttachToComponent(SkelMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, WoundFX.AttachSocket);
 
-							for (int iCap = 0; iCap < AllChildren.Num(); iCap++)
+							for (int iComponentName = 0; iComponentName < WoundFX.TagsOfComponentsToEnable.Num(); iComponentName++)
 							{
-								if (AllChildren[iCap]->ComponentHasTag(ComponentTag))
+								const FName ComponentTag = WoundFX.TagsOfComponentsToEnable[iComponentName];
+								if (ComponentTag == NAME_None)
 								{
-									AllChildren[iCap]->SetVisibility(true);
-									break;
+									continue;
+								}
+
+								for (int iCap = 0; iCap < AllChildren.Num(); iCap++)
+								{
+									if (AllChildren[iCap]->ComponentHasTag(ComponentTag))
+									{
+										AllChildren[iCap]->SetVisibility(true);
+										break;
+									}
+								}
+
+							}
+						}
+
+						const FWoundFXData& GibFX = CurWoundData.GibFX;
+						if (GibFX.AttachSocket != NAME_None)
+						{
+							if (GibFX.DismembermentFX != nullptr)
+							{
+								FVector SocketLocation;
+								FQuat SocketRotation;
+								SkelMesh->GetSocketWorldLocationAndRotation(GibFX.AttachSocket, SocketLocation, SocketRotation);
+
+								FTransform SocketTransform(SocketRotation, SocketLocation);
+								AActor* const FXActor = GetWorld()->SpawnActor(GibFX.DismembermentFX, &SocketTransform);
+								UStaticMeshComponent* SM = Cast<UStaticMeshComponent>(FXActor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+								if (SM != nullptr)
+								{
+									SM->AddImpulse(Impulse * 2.0f, NAME_None, true);
 								}
 							}
-
 						}
+						break;
 					}
+				}
+			}
 
-					const FWoundFXData& GibFX = CurWoundData.GibFX;
-					if (GibFX.AttachSocket != NAME_None)
+			// FX
+			/*
+			const FReferenceSkeleton& RefSkeleton = SkelMesh->SkeletalMesh->RefSkeleton;
+			const FTransform LocalToWorld = SkelMesh->GetComponentTransform();
+			const FTransform LocalToRef = LocalToWorld.Inverse() * RefSkeleton.
+			FVector3 HitLocation = DamageInfo.DamageLocation * SkelMesh->Transform
+			*/
+
+			static const FName ClipParams[] = { "WoundClip1_Params", "WoundClip2_Params"};
+			static const FName BoneParams[] = { "Wound1_Params", "Wound2_Params" };
+
+			for (int iBone = 0; iBone < WoundInstances.Num(); iBone++)
+			{
+				const FWoundInstance& WoundInst = WoundInstances[iBone];
+				const FWoundData& CurWoundData = WoundData[WoundInst.WoundIndex];
+
+				FLinearColor DamageBoneParam;
+				DamageBoneParam.R = WoundInst.HitLocation.X;
+				DamageBoneParam.G = WoundInst.HitLocation.Y;
+				DamageBoneParam.B = WoundInst.HitLocation.Z;
+				DamageBoneParam.A = CurWoundData.MaterialWoundRadius;
+
+				if (DamageBoneParam.A > 0.0f || CurWoundData.ClipSphereLocationAndRadius.W > 0.0f)
+				{
+					const TArray<UMaterialInterface*> MaterialInterfaces = SkelMesh->GetMaterials();
+					for (int32 MaterialIndex = 0; MaterialIndex < MaterialInterfaces.Num(); ++MaterialIndex)
 					{
-						if (GibFX.DismembermentFX != nullptr)
+						UMaterialInterface* MaterialInterface = MaterialInterfaces[MaterialIndex];
+						if (MaterialInterface)
 						{
-							FVector SocketLocation;
-							FQuat SocketRotation;
-							SkelMesh->GetSocketWorldLocationAndRotation(GibFX.AttachSocket, SocketLocation, SocketRotation);
-
-							FTransform SocketTransform(SocketRotation, SocketLocation);
-							AActor* const FXActor = GetWorld()->SpawnActor(GibFX.DismembermentFX, &SocketTransform);
-							UStaticMeshComponent* SM = Cast<UStaticMeshComponent>(FXActor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-							if (SM != nullptr)
+							UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(MaterialInterface);
+							if (!DynamicMaterial)
 							{
-								SM->AddImpulse(Impulse * 2.0f, NAME_None, true);
+								DynamicMaterial = SkelMesh->CreateAndSetMaterialInstanceDynamic(MaterialIndex);
+							}
+
+							if (DamageBoneParam.A > 0.0f)
+							{
+								DynamicMaterial->SetVectorParameterValue(BoneParams[iBone], DamageBoneParam);
+							}
+
+							if (CurWoundData.ClipSphereLocationAndRadius.W > 0.0f)
+							{
+								DynamicMaterial->SetVectorParameterValue(ClipParams[iBone], FLinearColor(CurWoundData.ClipSphereLocationAndRadius));
 							}
 						}
 					}
-					break;
 				}
-			}
-		}
 
-		// FX
-		/*
-		const FReferenceSkeleton& RefSkeleton = SkelMesh->SkeletalMesh->RefSkeleton;
-		const FTransform LocalToWorld = SkelMesh->GetComponentTransform();
-		const FTransform LocalToRef = LocalToWorld.Inverse() * RefSkeleton.
-		FVector3 HitLocation = DamageInfo.DamageLocation * SkelMesh->Transform
-		*/
-
-		static const FName ClipParams[] = { "WoundClip1_Params", "WoundClip2_Params"};
-		static const FName BoneParams[] = { "Wound1_Params", "Wound2_Params" };
-
-		for (int iBone = 0; iBone < WoundInstances.Num(); iBone++)
-		{
-			const FWoundInstance& WoundInst = WoundInstances[iBone];
-			const FWoundData& CurWoundData = WoundData[WoundInst.WoundIndex];
-
-			FLinearColor DamageBoneParam;
-			DamageBoneParam.R = WoundInst.HitLocation.X;
-			DamageBoneParam.G = WoundInst.HitLocation.Y;
-			DamageBoneParam.B = WoundInst.HitLocation.Z;
-			DamageBoneParam.A = CurWoundData.MaterialWoundRadius;
-
-			if (DamageBoneParam.A > 0.0f || CurWoundData.ClipSphereLocationAndRadius.W > 0.0f)
-			{
-				const TArray<UMaterialInterface*> MaterialInterfaces = SkelMesh->GetMaterials();
-				for (int32 MaterialIndex = 0; MaterialIndex < MaterialInterfaces.Num(); ++MaterialIndex)
+				if (CurWoundData.BoneConstraintToBreak != NAME_None)
 				{
-					UMaterialInterface* MaterialInterface = MaterialInterfaces[MaterialIndex];
-					if (MaterialInterface)
-					{
-						UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(MaterialInterface);
-						if (!DynamicMaterial)
-						{
-							DynamicMaterial = SkelMesh->CreateAndSetMaterialInstanceDynamic(MaterialIndex);
-						}
-
-						if (DamageBoneParam.A > 0.0f)
-						{
-							DynamicMaterial->SetVectorParameterValue(BoneParams[iBone], DamageBoneParam);
-						}
-
-						if (CurWoundData.ClipSphereLocationAndRadius.W > 0.0f)
-						{
-							DynamicMaterial->SetVectorParameterValue(ClipParams[iBone], FLinearColor(CurWoundData.ClipSphereLocationAndRadius));
-						}
-					}
+					SkelMesh->BreakConstraint(Impulse * 20.0f, WoundInst.HitLocation, CurWoundData.BoneConstraintToBreak);
 				}
 			}
 
-			if (CurWoundData.BoneConstraintToBreak != NAME_None)
-			{
-				SkelMesh->BreakConstraint(Impulse * 20.0f, WoundInst.HitLocation, CurWoundData.BoneConstraintToBreak);
-			}
+			// Physics
+			if (bRagdolling == false)
+	 		{
+				bRagdolling = true;
+				SkelMesh->SetSimulatePhysics(true);
+				SkelMesh->SetAllBodiesPhysicsBlendWeight(1.f);
+				SkelMesh->AddImpulse(Impulse, DamageInfo.HitBoneName, true);
+
+				SkelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+				GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 5.0f, true, 5.0f);
+			}		
 		}
-
-		// Physics
-		if (bRagdolling == false)
-	 	{
-			bRagdolling = true;
-			SkelMesh->SetSimulatePhysics(true);
-			SkelMesh->SetAllBodiesPhysicsBlendWeight(1.f);
-			SkelMesh->AddImpulse(Impulse, DamageInfo.HitBoneName, true);
-
-			SkelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-
-			GetOwner()->GetWorldTimerManager().SetTimer(RagdollSleepTimerHandle, this, &UOxiDamageComponent::DisableRagdoll, 5.0f, true, 5.0f);
-		}		
 	}
 
 	if (bJustKilled)
@@ -270,6 +294,11 @@ void UOxiPlayerDamageComponent::BeginPlay()
  */
 float UOxiPlayerDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
+	if (CVarGodMode.GetValueOnGameThread() > 0)
+	{
+		return 0.0f;
+	}
+
 	if (CurrentHealth <= 0)
 	{
 		return 0.0f;

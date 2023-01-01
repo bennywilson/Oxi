@@ -73,9 +73,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AOxiCover* GetCurrentCover() const { return CurrentCover; }
 
+	const TMap<FName, float> GetHitBoneToDamageMultiplier() const { return HitBoneToDamageMultiplier; }
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDeath_Internal(UOxiDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<FName, float> HitBoneToDamageMultiplier;
 
 private:
 
