@@ -224,6 +224,5 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 		OnTakeDamageDelegate.Broadcast(DamageInfo.DamageCauser, DamageInfo.DamageAmount);
 	}
 
-	Health -= DamageInfo.DamageAmount;
 	return 1.0f;
 }
