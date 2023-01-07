@@ -7,6 +7,13 @@
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTakeDamage, class AActor* const, float);
 
+UENUM(BlueprintType)
+enum EOxiDestructibleType
+{
+	Standing,
+	Crouching,
+};
+
 UCLASS(Blueprintable, editinlinenew, meta = (BlueprintSpawnableComponent))
 class OXI_API UOxiDestructibleComponent : public UOxiDamageComponent
 {
@@ -43,6 +50,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")
 	float ExplosionSplashDamageAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Oxi Damage FX")
+	TEnumAsByte<EOxiDestructibleType> DestructibleType;
 
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage FX")
 	float ExplosionImpulseMagnitude;
