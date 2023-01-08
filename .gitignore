@@ -80,3 +80,4 @@ hooks/pre-push
 hooks/post-merge
 hooks/post-commit
 hooks/post-checkout
+*.blend1
