@@ -156,3 +156,48 @@ void UOxiAIManager::UnregisterPlayer(AOxiFirstPersonCharacter* const Player)
 {
 	PlayerList.Remove(Player);
 }
+
+/**
+ *
+ */
+void UOxiAIManager::Tick(float DeltaTime)
+{
+	static int breakhere = 0;
+	breakhere++;
+
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+	const int tileWidth = 16;
+	const int halfTileWidth = tileWidth / 2;
+	const int NumCellsAcross = 8;
+	const int HalfNumCellsAcross = NumCellsAcross / 2;
+	FVector basePos = PlayerList[0]->GetActorLocation();
+	int xPos = ((int)basePos.X);
+	xPos = xPos - (xPos % tileWidth);
+
+	int yPos = ((int)basePos.Y);
+	yPos = yPos - (yPos % tileWidth);
+
+	UE_LOG(LogTemp, Log, TEXT("[%d], [%d]"), xPos, yPos);
+
+	for (int y = yPos - tileWidth * HalfNumCellsAcross; y <= yPos + tileWidth * HalfNumCellsAcross; y += tileWidth)
+	{
+		for (int x = xPos - tileWidth * HalfNumCellsAcross; x <= xPos + tileWidth * HalfNumCellsAcross; x += tileWidth)
+		{
+			DrawDebugBox(GetWorld(), FVector(x, y, basePos.Z), FVector(halfTileWidth, halfTileWidth, 0), FColor::Green, false, -1.0f, 0, 0.35f);
+
+		}
+	}
+
+//	DrawDebugBox(GetWorld(), FVector(xPos, yPos, basePos.Z), FVector(halfTileWidt	h, halfTileWidth, halfTileWidth), FColor::Green, false);
+}
+
+/**
+ *
+ */
+TStatId UOxiAIManager::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UOxiAIManager, STATGROUP_Tickables);
+}

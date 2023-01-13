@@ -71,7 +71,7 @@ protected:
  *
  */
 UCLASS()
-class OXI_API UOxiAIManager : public UGameInstanceSubsystem
+class OXI_API UOxiAIManager : public UGameInstanceSubsystem, public FTickableGameObject
 {
 
 	GENERATED_BODY()
@@ -102,6 +102,10 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<AOxiCover*> CoverList;
+
+	// FTickableGameObject
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override;
 };
 
 extern UOxiAIManager * GetOxiAIManager(UObject* const WorldContextObject);

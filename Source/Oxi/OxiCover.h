@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/ArrowComponent.h"
 #include "OxiCover.generated.h"
+
 
 /**
  *
@@ -20,6 +22,17 @@ enum class EOxiCoverProtectionLevel
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnProtectionLevel, class AOxiCover* const, EOxiCoverProtectionLevel);
+
+UCLASS(Blueprintable, editinlinenew, meta = (BlueprintSpawnableComponent))
+class OXI_API UOxiCoverSpotComponent : public UArrowComponent
+{
+	GENERATED_UCLASS_BODY()
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EOxiCoverProtectionLevel Bleh;
+};
 
 /**
  * 
@@ -66,6 +79,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* DamagedMesh;
+
+	TArray<UOxiCoverSpotComponent*> CoverSpotList;
 
 private:
 	UPROPERTY(Transient)
