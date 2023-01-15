@@ -57,6 +57,9 @@ public:
 
 	EOxiCoverProtectionLevel GetCoverProtectionLevel() const { return ProtectionLevel;}
 
+	UFUNCTION(BlueprintCallable)
+	UOxiCoverSpotComponent* GetBestCoverSpot(const FVector TargetPosition);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -80,7 +83,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* DamagedMesh;
 
-	TArray<UOxiCoverSpotComponent*> CoverSpotList;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FComponentReference> CoverSpotList;
 
 private:
 	UPROPERTY(Transient)
