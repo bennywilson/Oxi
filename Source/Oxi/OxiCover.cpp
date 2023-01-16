@@ -4,13 +4,23 @@
 #include "OxiDestructibleComponent.h"
 #include "AI/OxiAIManager.h"
 
-/** Toggles onscreen AI debugging information */
-static TAutoConsoleVariable<int32> CVarSquadDebug(
-	TEXT("oxi.coverdebug"),
-	-1,
-	TEXT("Show debug cover info"),
-	ECVF_Cheat
-);
+
+/**
+ *
+ */
+void UOxiCoverSpotComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	const FVector ShootHeight(0.0f, 0.0f, 170.0f);
+	const float ShootRightDistFromCoverSpot = 55.0f;
+	const float ShootForwardDistFromCoverSpot = 55.0f;
+
+	const FVector coverSpotLocation = GetComponentLocation();
+	const FVector coverSpotDirection = GetComponentRotation().Vector();
+	LeanLeftWorldFirePoint = coverSpotLocation + ShootHeight + FVector(coverSpotDirection.Y, coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+	LeanRightWorldFirePoint = coverSpotLocation + ShootHeight + FVector(-coverSpotDirection.Y, -coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+}
 
 /**
  *
@@ -45,13 +55,18 @@ void AOxiCover::BeginPlay()
 	DestructibleComponent->InitDestructibleComponent(UndamagedMesh, DamagedMesh);
 
 	DestructibleComponent->OnTakeDamageDelegate.AddUObject(this, &AOxiCover::OnDestructibleTakeDamage);
-	GetOxiAIManager(this)->RegisterCover(this);
+	CoverIndex = GetOxiAIManager(this)->RegisterCover(this);
 
-/*	TArray<UActorComponent*> CoverSpots = GetComponentsByClass(UOxiCoverSpotComponent::StaticClass());
-	for (int i = 0; i < CoverSpots.Num(); i++)
+	for (int i = 0; i < CoverSpotList.Num(); i++)
 	{
-	//	CoverSpotList.Add(static_cast<UOxiCoverSpotComponent*>(CoverSpots[i]));
-	}*/
+		UOxiCoverSpotComponent* const coverSpot = Cast<UOxiCoverSpotComponent>(CoverSpotList[i].GetComponent(this));
+		if (coverSpot == nullptr)
+		{
+			continue;
+		}
+
+		CoverSpots.Add(coverSpot);
+	}
 }
 
 /**
@@ -76,8 +91,10 @@ void AOxiCover::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const int SquadDebug = CVarSquadDebug.GetValueOnAnyThread();
-	if (SquadDebug > -1)
+	const int coverDebug = CVarCoverDebug.GetValueOnGameThread();
+	const int coverSpotDebug = CVarCoverSpotDebug.GetValueOnGameThread();
+
+	if (coverDebug == 0 || coverDebug == CoverIndex)
 	{
 		static float debugSphereRadius = 10.0f;
 		static float debugArrowLength = 20;
@@ -86,24 +103,24 @@ void AOxiCover::Tick(float DeltaTime)
 
 		for (int i = 0; i < CoverSpotList.Num(); i++)
 		{
-			if (SquadDebug != 0 && SquadDebug != i)
+			if (coverSpotDebug != 0 && coverSpotDebug != i)
 			{
 				continue;
 			}
 
-			UOxiCoverSpotComponent* CoverSpot = Cast<UOxiCoverSpotComponent>(CoverSpotList[i].GetComponent(this));
-			if (CoverSpot == nullptr)
+			UOxiCoverSpotComponent* const coverSpot = Cast<UOxiCoverSpotComponent>(CoverSpotList[i].GetComponent(this));
+			if (coverSpot == nullptr)
 			{
 				continue;
 			}
 
-			const FVector CoverSpotLocation = CoverSpot->GetComponentLocation();
-			const FVector CoverSpotDirection = CoverSpot->GetComponentRotation().Vector();
+			const FVector coverSpotLocation = coverSpot->GetComponentLocation();
+			const FVector coverSpotDirection = coverSpot->GetComponentRotation().Vector();
 
-			DrawDebugSphere(GetWorld(), CoverSpotLocation, debugSphereRadius, 16, FColor::Green);
-			DrawDebugDirectionalArrow(GetWorld(), CoverSpotLocation, CoverSpotLocation + CoverSpotDirection * debugArrowLength, debugArrowSize, FColor::Red, false, -1.0f, 0, debugArrowThickness);
+			DrawDebugSphere(GetWorld(), coverSpotLocation, debugSphereRadius, 16, FColor::Green);
+			DrawDebugDirectionalArrow(GetWorld(), coverSpotLocation, coverSpotLocation + coverSpotDirection * debugArrowLength, debugArrowSize, FColor::Red, false, -1.0f, 0, debugArrowThickness);
 
-			if (SquadDebug == 0)
+			if (coverDebug == 0)
 			{
 				continue;
 			}
@@ -112,8 +129,8 @@ void AOxiCover::Tick(float DeltaTime)
 			const float ShootRightDistFromCoverSpot = 55.0f;
 			const float ShootForwardDistFromCoverSpot = 55.0f;
 
-			const FVector LeftLeanShootPos = CoverSpotLocation + ShootHeight + FVector(CoverSpotDirection.Y, CoverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(CoverSpotDirection.X, CoverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
-			const FVector RightLeanShootPos = CoverSpotLocation + ShootHeight + FVector(-CoverSpotDirection.Y, -CoverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(CoverSpotDirection.X, CoverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+			const FVector LeftLeanShootPos = coverSpotLocation + ShootHeight + FVector(coverSpotDirection.Y, coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+			const FVector RightLeanShootPos = coverSpotLocation + ShootHeight + FVector(-coverSpotDirection.Y, -coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
 
 			DrawDebugSphere(GetWorld(), LeftLeanShootPos, debugSphereRadius, 16, FColor::Green);
 			DrawDebugSphere(GetWorld(), RightLeanShootPos, debugSphereRadius, 16, FColor::Green);
@@ -126,6 +143,9 @@ void AOxiCover::Tick(float DeltaTime)
  */
 bool AOxiCover::AddUser(AOxiCharacter* const NewUser)
 {
+	// Only one user per cover for now
+	check(CurrentUsers.Num() == 0);
+	
 	CurrentUsers.Add(NewUser);
 	OnProtectionLevelChanged.AddUObject(NewUser, &AOxiCharacter::OnCoverProtectionLevelChanged);
 

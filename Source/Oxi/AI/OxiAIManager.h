@@ -10,6 +10,9 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogOxiAI, Warning, All);
 
+extern TAutoConsoleVariable<int32> CVarCoverDebug;
+extern TAutoConsoleVariable<int32> CVarCoverSpotDebug;
+
 /**
  *
  */
@@ -59,6 +62,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AOxiCover* FindAndAcquireCover();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	AActor* GetEnemyTarget();
+
 protected:
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) override;
 
@@ -73,14 +79,16 @@ protected:
 UCLASS()
 class OXI_API UOxiAIManager : public UGameInstanceSubsystem, public FTickableGameObject
 {
-
 	GENERATED_BODY()
 
 public:
+
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 	void RegisterSquad(class AOxiSquad* const Squad);
 	void UnregisterSquad(AOxiSquad* const Squad);
 
-	void RegisterCover(AOxiCover* const Cover);
+	uint32 RegisterCover(AOxiCover* const Cover);
 	void UnregisterCover(AOxiCover* const Cover);
 
 	void RegisterPlayer(AOxiFirstPersonCharacter* const Player);
@@ -103,9 +111,18 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<AOxiCover*> CoverList;
 
+	int32 CurrentCoverToTrace;
+
 	// FTickableGameObject
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
+
+private:
+	void UpdateLineTraces();
+
+	void DrawDebugInfo();
+
+	uint32 NextCoverIndex = 1;
 };
 
 extern UOxiAIManager * GetOxiAIManager(UObject* const WorldContextObject);

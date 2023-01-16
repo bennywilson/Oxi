@@ -8,6 +8,26 @@
 
 DEFINE_LOG_CATEGORY(LogOxiAI);
 
+/** Toggles onscreen AI debugging information */
+TAutoConsoleVariable<int32> CVarCoverDebug(
+	TEXT("oxi.coverdebug"),
+	-1,
+	TEXT("Show debug cover info. 0 Shows all.  Otherwise the # indicates a specific cover to display"),
+	ECVF_Cheat
+);
+
+TAutoConsoleVariable<int32> CVarCoverSpotDebug(
+	TEXT("oxi.coverspotdebug"),
+	-1,
+	TEXT("Show debug cover spot info. 0 Shows all.  Otherwise the # indicates a specific cover spor to display"),
+	ECVF_Cheat
+);
+
+const int g_TileWidth = 16 * 3;
+const int g_HalfTileWidth = g_TileWidth / 2;
+const int g_NumCellsAcross = 3;
+const int g_HalfNumCellsAcross = g_NumCellsAcross / 2;
+
 /**
  *
  */
@@ -67,7 +87,6 @@ bool AOxiAICharacter::HasReachedDestination()
 	return PathComponent->DidMoveReachGoal();
 }
 
-
 /**
  * 
  */
@@ -110,6 +129,16 @@ void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxi
 }
 
 /**
+ *
+ */
+void UOxiAIManager::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	CurrentCoverToTrace = 0;
+}
+
+/**
  * 
  */
 void UOxiAIManager::RegisterSquad(AOxiSquad* const Squad)
@@ -128,9 +157,13 @@ void UOxiAIManager::UnregisterSquad(AOxiSquad* const Squad)
 /**
  *
  */
-void UOxiAIManager::RegisterCover(AOxiCover* const Squad)
+uint32 UOxiAIManager::RegisterCover(AOxiCover* const Squad)
 {
 	CoverList.Add(Squad);
+	
+	uint32 coverIdx = NextCoverIndex;
+	NextCoverIndex++;
+	return coverIdx;
 }
 
 /**
@@ -162,36 +195,18 @@ void UOxiAIManager::UnregisterPlayer(AOxiFirstPersonCharacter* const Player)
  */
 void UOxiAIManager::Tick(float DeltaTime)
 {
-	static int breakhere = 0;
-	breakhere++;
-
 	if (PlayerList.Num() == 0)
 	{
 		return;
 	}
-	const int tileWidth = 16;
-	const int halfTileWidth = tileWidth / 2;
-	const int NumCellsAcross = 8;
-	const int HalfNumCellsAcross = NumCellsAcross / 2;
-	FVector basePos = PlayerList[0]->GetActorLocation();
-	int xPos = ((int)basePos.X);
-	xPos = xPos - (xPos % tileWidth);
 
-	int yPos = ((int)basePos.Y);
-	yPos = yPos - (yPos % tileWidth);
+	// Line Traces
+	UpdateLineTraces();
 
-	UE_LOG(LogTemp, Log, TEXT("[%d], [%d]"), xPos, yPos);
+	// Debug Drawing
+	DrawDebugInfo();
 
-	for (int y = yPos - tileWidth * HalfNumCellsAcross; y <= yPos + tileWidth * HalfNumCellsAcross; y += tileWidth)
-	{
-		for (int x = xPos - tileWidth * HalfNumCellsAcross; x <= xPos + tileWidth * HalfNumCellsAcross; x += tileWidth)
-		{
-			DrawDebugBox(GetWorld(), FVector(x, y, basePos.Z), FVector(halfTileWidth, halfTileWidth, 0), FColor::Green, false, -1.0f, 0, 0.35f);
-
-		}
-	}
-
-//	DrawDebugBox(GetWorld(), FVector(xPos, yPos, basePos.Z), FVector(halfTileWidt	h, halfTileWidth, halfTileWidth), FColor::Green, false);
+	// Debug Drawing
 }
 
 /**
@@ -200,4 +215,106 @@ void UOxiAIManager::Tick(float DeltaTime)
 TStatId UOxiAIManager::GetStatId() const
 {
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UOxiAIManager, STATGROUP_Tickables);
+}
+
+/**
+ *
+ */
+void UOxiAIManager::UpdateLineTraces()
+{
+	if (CoverList.Num() == 0)
+	{
+		return;
+	}
+
+	if (CurrentCoverToTrace >= CoverList.Num())
+	{
+		CurrentCoverToTrace = 0;
+	}
+
+	AOxiCover* const currCover = CoverList[CurrentCoverToTrace];
+	FVector basePos = PlayerList[0]->GetActorLocation();
+	int xPos = ((int)basePos.X);
+	xPos = xPos - (xPos % g_TileWidth);
+
+	int yPos = ((int)basePos.Y);
+	yPos = yPos - (yPos % g_TileWidth);
+
+	const TArray<UOxiCoverSpotComponent*>& coverSpots = currCover->GetCoverSpots();
+}
+
+/**
+ *
+ */
+void UOxiAIManager::DrawDebugInfo()
+{
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+
+	FVector basePos = PlayerList[0]->GetActorLocation();
+	int xPos = ((int)basePos.X);
+	xPos = xPos - (xPos % g_TileWidth);
+
+	int yPos = ((int)basePos.Y);
+	yPos = yPos - (yPos % g_TileWidth);
+
+	for (int y = yPos - g_TileWidth * g_HalfNumCellsAcross; y <= yPos + g_TileWidth * g_HalfNumCellsAcross; y += g_TileWidth)
+	{
+		for (int x = xPos - g_TileWidth * g_HalfNumCellsAcross; x <= xPos + g_TileWidth * g_HalfNumCellsAcross; x += g_TileWidth)
+		{
+			DrawDebugBox(GetWorld(), FVector(x, y, basePos.Z), FVector(g_HalfTileWidth, g_HalfTileWidth, 0), FColor::Green, false, -1.0f, 0, 0.35f);
+		}
+	}
+
+	// Debug Draw
+	const int32 coverDebugLevel = CVarCoverDebug.GetValueOnGameThread();
+	const int32 coverSpotDebugLevel = CVarCoverSpotDebug.GetValueOnGameThread();
+
+	if (coverDebugLevel >= 1 && coverSpotDebugLevel >= 0)
+	{
+		bool drawLineTraces = coverDebugLevel == 0;
+		AOxiCover* coverToDrawFrom = nullptr;
+		for (int32 i = 0; i < CoverList.Num(); i++)
+		{
+			if (CoverList[i]->GetCoverIndex() == coverDebugLevel)
+			{
+				coverToDrawFrom = CoverList[i];
+				break;
+			}
+		}
+
+		if (coverToDrawFrom != nullptr)
+		{
+			const TArray<UOxiCoverSpotComponent*>& coverSpots = coverToDrawFrom->GetCoverSpots();
+			if (coverSpotDebugLevel < coverSpots.Num())
+			{
+				TArray<AActor*> actorsToIgnore;
+				actorsToIgnore.Add(PlayerList[0]);
+
+				const UOxiCoverSpotComponent* const debugCoverSpot = coverSpots[coverSpotDebugLevel];
+				for (int y = yPos - g_TileWidth * g_HalfNumCellsAcross; y <= yPos + g_TileWidth * g_HalfNumCellsAcross; y += g_TileWidth)
+				{
+					for (int x = xPos - g_TileWidth * g_HalfNumCellsAcross; x <= xPos + g_TileWidth * g_HalfNumCellsAcross; x += g_TileWidth)
+					{
+						FHitResult hitResult;
+						FCollisionQueryParams params = FCollisionQueryParams::DefaultQueryParam;
+						params.AddIgnoredActors(actorsToIgnore);
+
+						GetWorld()->LineTraceSingleByChannel(hitResult, debugCoverSpot->GetLeanLeftFirePoint(), FVector(x, y, basePos.Z), ECollisionChannel::ECC_Visibility, params);
+
+						if (hitResult.bBlockingHit)
+						{
+							DrawDebugLine(GetWorld(), debugCoverSpot->GetLeanLeftFirePoint(), hitResult.ImpactPoint, FColor::Red, false, -1.0, 0, 0.32f);
+						}
+						else
+						{
+							DrawDebugLine(GetWorld(), debugCoverSpot->GetLeanLeftFirePoint(), FVector(x, y, basePos.Z), FColor::Blue, false, -1.0, 0, 0.32f);
+						}
+					}
+				}
+			}
+		}
+	}
 }

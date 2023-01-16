@@ -28,10 +28,19 @@ class OXI_API UOxiCoverSpotComponent : public UArrowComponent
 {
 	GENERATED_UCLASS_BODY()
 
+	virtual void BeginPlay() override;
+
+	FVector GetLeanLeftFirePoint() const { return LeanLeftWorldFirePoint; }
+	FVector GetLeanRightFirePoint() const { return LeanRightWorldFirePoint; }
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiCoverProtectionLevel Bleh;
+
+private:
+	FVector LeanLeftWorldFirePoint;
+	FVector LeanRightWorldFirePoint;
 };
 
 /**
@@ -60,6 +69,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UOxiCoverSpotComponent* GetBestCoverSpot(const FVector TargetPosition);
 
+	const TArray<UOxiCoverSpotComponent*>& GetCoverSpots() const { return CoverSpots; }
+
+	uint32 GetCoverIndex() const { return CoverIndex; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -86,7 +99,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FComponentReference> CoverSpotList;
 
+	// At init, the components in CoverSpotList are moved into CoverSpots
+	TArray<UOxiCoverSpotComponent*> CoverSpots;
+
 private:
 	UPROPERTY(Transient)
 	TArray<AOxiCharacter*> CurrentUsers;
+
+	uint32 CoverIndex;
 };
