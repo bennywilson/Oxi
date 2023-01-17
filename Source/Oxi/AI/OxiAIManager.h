@@ -99,7 +99,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AOxiCover* FindNearestUnusedCover(const FVector& TestPoint);
 
-	TArray<AOxiCover*> GetCoverList() const { return CoverList; }
+	TArray<AOxiCover*>& GetCoverList() { return CoverList; }
 
 protected:
 	UPROPERTY(Transient)
@@ -123,6 +123,12 @@ private:
 	void DrawDebugInfo();
 
 	uint32 NextCoverIndex = 1;
+
+public:
+	const static int TileWidth = 16 * 3;
+	const static int HalfTileWidth = TileWidth / 2;
+	const static int NumCellsAcross = 3;
+	const static int HalfNumCellsAcross = NumCellsAcross / 2;
 };
 
 extern UOxiAIManager * GetOxiAIManager(UObject* const WorldContextObject);

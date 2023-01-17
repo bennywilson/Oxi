@@ -26,6 +26,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnProtectionLevel, class AOxiCover* const,
 UCLASS(Blueprintable, editinlinenew, meta = (BlueprintSpawnableComponent))
 class OXI_API UOxiCoverSpotComponent : public UArrowComponent
 {
+	friend class AOxiCover;
+
 	GENERATED_UCLASS_BODY()
 
 	virtual void BeginPlay() override;
@@ -33,7 +35,15 @@ class OXI_API UOxiCoverSpotComponent : public UArrowComponent
 	FVector GetLeanLeftFirePoint() const { return LeanLeftWorldFirePoint; }
 	FVector GetLeanRightFirePoint() const { return LeanRightWorldFirePoint; }
 
+	void SetLeftLeanVisibilityToTarget(const float visibility) { LeftLeanVisibilityToTarget = visibility; }
+	void SetRightLeanVisibilityToTarget(const float visibility) { RightLeanVisibilityToTarget = visibility; }
+
+	float GetLeftLeanVisibilityToTarget() const { return LeftLeanVisibilityToTarget; }
+	float GetRightLeanVisibilityToTarget() const { return RightLeanVisibilityToTarget; }
+
 protected:
+
+	TArray<FTraceHandle>& GetVisibilityHandles() { return VisibilityTraceHandles; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiCoverProtectionLevel Bleh;
@@ -41,6 +51,10 @@ protected:
 private:
 	FVector LeanLeftWorldFirePoint;
 	FVector LeanRightWorldFirePoint;
+
+	TArray<FTraceHandle> VisibilityTraceHandles;
+	float LeftLeanVisibilityToTarget;
+	float RightLeanVisibilityToTarget;
 };
 
 /**

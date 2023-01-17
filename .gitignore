@@ -81,3 +81,5 @@ hooks/post-merge
 hooks/post-commit
 hooks/post-checkout
 *.blend1
+
+enc_temp_folder/*
