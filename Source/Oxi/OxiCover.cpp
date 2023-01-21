@@ -18,8 +18,12 @@ void UOxiCoverSpotComponent::BeginPlay()
 
 	const FVector coverSpotLocation = GetComponentLocation();
 	const FVector coverSpotDirection = GetComponentRotation().Vector();
-	LeanLeftWorldFirePoint = coverSpotLocation + ShootHeight + FVector(coverSpotDirection.Y, coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
-	LeanRightWorldFirePoint = coverSpotLocation + ShootHeight + FVector(-coverSpotDirection.Y, -coverSpotDirection.X, 0.0f) * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+	const FVector coverSpotPerp = coverSpotDirection.Cross(FVector(0.0f, 0.0f, 1.0f)).GetSafeNormal();
+	// .707105 0.707108 0
+
+
+	LeanLeftWorldFirePoint = coverSpotLocation + ShootHeight + coverSpotPerp * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
+	LeanRightWorldFirePoint = coverSpotLocation + ShootHeight + -coverSpotPerp * ShootRightDistFromCoverSpot + FVector(coverSpotDirection.X, coverSpotDirection.Y, 0.0f) * ShootForwardDistFromCoverSpot;
 
 	LeftLeanVisibilityToTarget = 0;
 	RightLeanVisibilityToTarget = 0;
@@ -94,245 +98,11 @@ void AOxiCover::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const int coverDebug = CVarCoverDebug.GetValueOnGameThread();
-	const int coverSpotDebug = CVarCoverSpotDebug.GetValueOnGameThread();
-	const bool bDebugDraw = coverDebug == 0 || coverDebug == CoverIndex;
+	UpdateVisTraces();
 
-	if (bDebugDraw)
-	{
-		static float debugSphereRadius = 10.0f;
-		static float debugArrowLength = 20;
-		static float debugArrowThickness = 2.0f;
-		static float debugArrowSize = 15.0f;
 
-		for (int i = 0; i < CoverSpotList.Num(); i++)
-		{
-			if (coverSpotDebug != 0 && coverSpotDebug != i + 1)
-			{
-				continue;
-			}
 
-			UOxiCoverSpotComponent* const coverSpot = Cast<UOxiCoverSpotComponent>(CoverSpotList[i].GetComponent(this));
-			if (coverSpot == nullptr)
-			{
-				continue;
-			}
-
-			const FVector coverSpotLocation = coverSpot->GetComponentLocation();
-			const FVector coverSpotDirection = coverSpot->GetComponentRotation().Vector();
-
-			DrawDebugSphere(GetWorld(), coverSpotLocation, debugSphereRadius, 16, FColor::Green);
-			DrawDebugDirectionalArrow(GetWorld(), coverSpotLocation, coverSpotLocation + coverSpotDirection * debugArrowLength, debugArrowSize, FColor::Red, false, -1.0f, 0, debugArrowThickness);
-
-			if (coverDebug == 0)
-			{
-				continue;
-			}
-
-			FColor sphereColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, coverSpot->GetLeftLeanVisibilityToTarget()).ToFColor(false);
-			DrawDebugSphere(GetWorld(), coverSpot->GetLeanLeftFirePoint(), debugSphereRadius, 16, sphereColor);
-
-			sphereColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, coverSpot->GetRightLeanVisibilityToTarget()).ToFColor(false);
-			DrawDebugSphere(GetWorld(), coverSpot->GetLeanRightFirePoint(), debugSphereRadius, 16, sphereColor);
-		}
-	}
-
-	UOxiAIManager* const aiMgr = GetOxiAIManager(this);
-	auto PlayerList = aiMgr->GetPlayerList();
-	if (PlayerList.Num() == 0)
-	{
-		return;
-	}
-
-	FVector basePos = PlayerList[0]->GetActorLocation();
-	int xPos = ((int)basePos.X);
-	xPos = xPos - (xPos % UOxiAIManager::TileWidth);
-
-	int yPos = ((int)basePos.Y);
-	yPos = yPos - (yPos % UOxiAIManager::TileWidth);
-
-	for (int y = yPos - UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; y <= yPos + UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; y += UOxiAIManager::TileWidth)
-	{
-		for (int x = xPos - UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; x <= xPos + UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; x += UOxiAIManager::TileWidth)
-		{
-			DrawDebugBox(GetWorld(), FVector(x, y, basePos.Z), FVector(UOxiAIManager::HalfTileWidth, UOxiAIManager::HalfTileWidth, 0), FColor::Green, false, -1.0f, 0, 0.35f);
-		}
-	}
-
-	TArray<AActor*> actorsToIgnore;
-	actorsToIgnore.Add(PlayerList[0]);
-
-	const int32 visTileWidth = UOxiAIManager::TileWidth;
-	const int32 halfNumCellsAcross = UOxiAIManager::HalfNumCellsAcross;
-
-	// Get Last Frame
-	for (int iCoverSpot = 0; iCoverSpot < CoverSpotList.Num(); iCoverSpot++)
-	{
-		UOxiCoverSpotComponent* const curCoverSpot = CoverSpots[iCoverSpot];
-		auto& visiblityTraces = curCoverSpot->GetVisibilityHandles();
-		const int32 halfNumTraces = visiblityTraces.Num() / 2;
-
-		float leftLeanVis = 0;
-		float rightLeanVis = 0;
-		for (int32 iTrace = 0; iTrace < visiblityTraces.Num(); iTrace++)
-		{
-			FTraceDatum traceData;
-			const bool bTraceValid = GetWorld()->QueryTraceData(visiblityTraces[iTrace], traceData);
-			if (bTraceValid == false)
-			{
-				continue;
-			}
-
-			if (traceData.OutHits.Num() == 0)
-			{
-				if (iTrace < halfNumTraces)
-				{
-					leftLeanVis += 1.0f;
-				}
-				else
-				{
-					rightLeanVis += 1.0f;
-				}
-			}
-	
-			if (bDebugDraw && (coverSpotDebug == 0 || coverSpotDebug - 1 == iCoverSpot))
-			{
-				if (traceData.OutHits.Num() > 0)
-				{
-					DrawDebugLine(GetWorld(), traceData.Start, traceData.OutHits[0].ImpactPoint, FColor::Red, false, -1.0, 0, 0.32f);
-				}
-				else
-				{
-					DrawDebugLine(GetWorld(), traceData.Start, traceData.End, FColor::Blue, false, -1.0, 0, 0.32f);
-				}
-			}
-		}
-
-		curCoverSpot->SetLeftLeanVisibilityToTarget(leftLeanVis / halfNumTraces);
-		curCoverSpot->SetRightLeanVisibilityToTarget(rightLeanVis / halfNumTraces);
-		visiblityTraces.Empty();
-	}
-
-	// Queue up async line traces
-	for (int iCoverSpot = 0; iCoverSpot < CoverSpotList.Num(); iCoverSpot++)
-	{
-		UOxiCoverSpotComponent* const curCoverSpot = CoverSpots[iCoverSpot];
-
-		float leftLeanVis = 0;
-		float rightLeanVis = 0;
-
-		const FVector firePositions[] = { curCoverSpot->GetLeanLeftFirePoint(), curCoverSpot->GetLeanRightFirePoint() };
-
-		for (int iLean = 0; iLean < 2; iLean++)
-		{
-			for (int y = yPos - visTileWidth * halfNumCellsAcross; y <= yPos + visTileWidth * halfNumCellsAcross; y += visTileWidth)
-			{
-				for (int x = xPos - visTileWidth * halfNumCellsAcross; x <= xPos + visTileWidth * halfNumCellsAcross; x += visTileWidth)
-				{
-					FHitResult hitResult;
-					FCollisionQueryParams params = FCollisionQueryParams::DefaultQueryParam;
-					params.AddIgnoredActors(actorsToIgnore);
-					const FVector cellPos = FVector(x, y, basePos.Z);
-
-					FTraceHandle traceHandle = GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single, firePositions[iLean], cellPos, ECollisionChannel::ECC_Visibility, params);
-					if (traceHandle.IsValid() == false)
-					{
-						continue;
-					}
-
-					curCoverSpot->GetVisibilityHandles().Add(traceHandle);
-					//DrawDebugLine(GetWorld(), firePositions[iLean], cellPos, FColor::Red, false, -1.0, 0, 0.32f);
-				}
-			}
-		}
-	}
-
-	/*float leftPointVis = 0, rightPointVis = 0;
-
-	for (int iTrace = 0; iTrace < VisibilityTraceHandles.Num(); iTrace++)
-	{
-		FTraceDatum traceData;
-		const bool bTraceValid = GetWorld()->QueryTraceData(VisibilityTraceHandles[iTrace], traceData);
-		if (bTraceValid == false)
-		{
-			continue;
-		}
-
-		if (traceData.OutHits.Num() > 0)
-		{
-			if (iTrace < halfTraceListSize)
-			{
-				leftPointVis += 1.0f;
-			}
-			else
-			{
-				rightPointVis += 1.0f;
-			}
-		}
-
-		if (bDebugDraw)
-		{
-			if (traceData.OutHits.Num() == 0)
-			{
-				DrawDebugLine(GetWorld(), traceData.Start, traceData.End, FColor::Blue, false, -1.0, 0, 0.32f);
-			}
-			else
-			{
-				leftPointVis += 1.0f;
-				DrawDebugLine(GetWorld(), traceData.Start, traceData.OutHits[0].ImpactPoint, FColor::Red, false, -1.0, 0, 0.32f);
-			}
-		}
-	}
-	leftPointVis /= halfWayIdx;
-	rightPointVis /= halfWayIdx;
-	
-
-	VisibilityTraceHandles.Empty();
-
-	if (coverDebugLevel >= 1 && coverSpotDebugLevel >= 0)
-	{
-		TArray<AOxiCover*>& coverList = aiMgr->GetCoverList();
-		bool drawLineTraces = coverDebugLevel == 0;
-		AOxiCover* coverToDrawFrom = nullptr;
-		for (int32 i = 0; i < coverList.Num(); i++)
-		{
-			if (coverList[i]->GetCoverIndex() == coverDebugLevel)
-			{
-				coverToDrawFrom = coverList[i];
-				break;
-			}
-		}
-
-		if (coverToDrawFrom != nullptr)
-		{
-			const TArray<UOxiCoverSpotComponent*>& coverSpots = coverToDrawFrom->GetCoverSpots();
-			if (coverSpotDebugLevel < coverSpots.Num())
-			{
-				TArray<AActor*> actorsToIgnore;
-				actorsToIgnore.Add(PlayerList[0]);
-
-				const UOxiCoverSpotComponent* const debugCoverSpot = coverSpots[coverSpotDebugLevel];
-				for (int y = yPos - UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; y <= yPos + UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; y += UOxiAIManager::TileWidth)
-				{
-					for (int x = xPos - UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; x <= xPos + UOxiAIManager::TileWidth * UOxiAIManager::HalfNumCellsAcross; x += UOxiAIManager::TileWidth)
-					{
-						FHitResult hitResult;
-						FCollisionQueryParams params = FCollisionQueryParams::DefaultQueryParam;
-						params.AddIgnoredActors(actorsToIgnore);
-						const FVector cellPos = FVector(x, y, basePos.Z);
-						//GetWorld()->LineTraceSingleByChannel(hitResult, debugCoverSpot->GetLeanLeftFirePoint(), cellPos, ECollisionChannel::ECC_Visibility, params);
-						FTraceHandle traceHandle = GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single, debugCoverSpot->GetLeanLeftFirePoint(), cellPos, ECollisionChannel::ECC_Visibility, params);
-						if (traceHandle.IsValid() == false)
-						{
-							continue;
-						}
-
-						VisibilityTraceHandles.Add(traceHandle);
-					}
-				}
-			}
-		}
-	}*/
+	DebugDrawCoverInfo();
 }
 
 /**
@@ -390,6 +160,199 @@ UOxiCoverSpotComponent* AOxiCover::GetBestCoverSpot(const FVector TargetPosition
 	}
 
 	return BestCoverSpot;
+}
+
+/**
+ *
+ */
+void AOxiCover::UpdateVisTraces()
+{
+	const int coverDebug = CVarCoverDebug.GetValueOnGameThread();
+	const int coverSpotDebug = CVarCoverSpotDebug.GetValueOnGameThread();
+	const bool bDebugDraw = coverDebug == 0 || coverDebug == CoverIndex;
+
+	UOxiAIManager* const aiMgr = GetOxiAIManager(this);
+	auto PlayerList = aiMgr->GetPlayerList();
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+
+	TArray<AActor*> actorsToIgnore;
+	actorsToIgnore.Add(PlayerList[0]);
+
+	// Get Last Frame
+	for (int iCoverSpot = 0; iCoverSpot < CoverSpotList.Num(); iCoverSpot++)
+	{
+		UOxiCoverSpotComponent* const curCoverSpot = CoverSpots[iCoverSpot];
+		TArray<FDebugTraceData>& debugTraceDataList = curCoverSpot->GetDebugTraceDataList();
+		auto& visiblityTraces = curCoverSpot->GetVisibilityHandles();
+		if (visiblityTraces.Num() == 0)
+		{
+			if (bDebugDraw && (coverSpotDebug == 0 || coverSpotDebug - 1 == iCoverSpot))
+			{
+				for (int iDebugTrace = 0; iDebugTrace < debugTraceDataList.Num(); iDebugTrace++)
+				{
+					const FDebugTraceData& debugTraceData = debugTraceDataList[iDebugTrace];
+					if (debugTraceData.HitSomething)
+					{
+
+						DrawDebugLine(GetWorld(), debugTraceData.Start, debugTraceData.End, FColor::Red, false, -1.0f, 0, 0.32f);
+					}
+					else
+					{
+						DrawDebugLine(GetWorld(), debugTraceData.Start, debugTraceData.End, FColor::Blue, false, -1.0f, 0, 0.32f);
+					}
+				}
+			}
+
+			continue;
+		}
+
+		const int32 halfNumTraces = visiblityTraces.Num() / 2;
+
+		float leftLeanVis = 0;
+		float rightLeanVis = 0;
+		for (int32 iTrace = 0; iTrace < visiblityTraces.Num(); iTrace++)
+		{
+			FTraceDatum traceData;
+			const bool bTraceValid = GetWorld()->QueryTraceData(visiblityTraces[iTrace], traceData);
+			if (bTraceValid == false)
+			{
+				continue;
+			}
+
+			FDebugTraceData debugTraceData;
+			debugTraceData.Start = traceData.Start;
+
+			if (traceData.OutHits.Num() == 0)
+			{
+				if (iTrace < halfNumTraces)
+				{
+					leftLeanVis += 1.0f;
+				}
+				else
+				{
+					rightLeanVis += 1.0f;
+				}
+
+				debugTraceData.End = traceData.End;
+				debugTraceData.HitSomething = false;
+			}
+			else
+			{
+				debugTraceData.HitSomething = true;
+				debugTraceData.End = traceData.OutHits[0].Location;
+			}
+
+			debugTraceDataList.Add(debugTraceData);
+		}
+
+		curCoverSpot->SetLeftLeanVisibilityToTarget(leftLeanVis / halfNumTraces);
+		curCoverSpot->SetRightLeanVisibilityToTarget(rightLeanVis / halfNumTraces);
+		visiblityTraces.Empty();
+	}
+
+	if (CoverIndex != aiMgr->GetCurrentCoverVisTest())
+	{
+		return;
+	}
+
+	// Draw Player Cells
+	FVector basePos = PlayerList[0]->GetActorLocation();
+
+	const int32 visTileWidth = UOxiAIManager::VisCellWidth;
+	const int32 halfNumCellsAcross = UOxiAIManager::HalfVisCellWidth;
+
+	// Queue up async line traces
+	for (int iCoverSpot = 0; iCoverSpot < CoverSpotList.Num(); iCoverSpot++)
+	{
+		UOxiCoverSpotComponent* const curCoverSpot = CoverSpots[iCoverSpot];
+		TArray<FDebugTraceData>& debugTraceDataList = curCoverSpot->GetDebugTraceDataList();
+		debugTraceDataList.Empty();
+
+		float leftLeanVis = 0;
+		float rightLeanVis = 0;
+
+		const FVector firePositions[] = { curCoverSpot->GetLeanLeftFirePoint(), curCoverSpot->GetLeanRightFirePoint() };
+
+		for (int iLean = 0; iLean < 2; iLean++)
+		{
+			const float startOffset = -((UOxiAIManager::VisCellWidth * UOxiAIManager::HalfVisCellsAcross) - (UOxiAIManager::VisCellWidth * 0.5f));
+
+			for (int y = 0; y < UOxiAIManager::VisCellsAcross; y++)
+			{
+				const float yPos = basePos.Y + startOffset + (y * UOxiAIManager::VisCellWidth);
+				for (int x = 0; x < UOxiAIManager::VisCellsAcross; x++)
+				{
+					const float xPos = basePos.X + startOffset + (x * UOxiAIManager::VisCellWidth);
+
+					FHitResult hitResult;
+					FCollisionQueryParams params = FCollisionQueryParams::DefaultQueryParam;
+					params.AddIgnoredActors(actorsToIgnore);
+					const FVector cellPos = FVector(xPos, yPos, basePos.Z);
+
+					FTraceHandle traceHandle = GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single, firePositions[iLean], cellPos, ECollisionChannel::ECC_Visibility, params);
+					if (traceHandle.IsValid() == false)
+					{
+						continue;
+					}
+
+					curCoverSpot->GetVisibilityHandles().Add(traceHandle);
+				}
+			}
+		}
+	}
+}
+
+/**
+ *
+ */
+void AOxiCover::DebugDrawCoverInfo()
+{
+	const int coverDebug = CVarCoverDebug.GetValueOnGameThread();
+	const int coverSpotDebug = CVarCoverSpotDebug.GetValueOnGameThread();
+	const bool bDebugDraw = coverDebug == 0 || coverDebug == CoverIndex;
+	if (bDebugDraw == false)
+	{
+		return;
+	}
+
+	const float debugSphereRadius = 10.0f;
+	const float debugArrowLength = 20;
+	const float debugArrowThickness = 2.0f;
+	const float debugArrowSize = 15.0f;
+
+	for (int i = 0; i < CoverSpotList.Num(); i++)
+	{
+		if (coverSpotDebug != 0 && coverSpotDebug != i + 1)
+		{
+			continue;
+		}
+
+		UOxiCoverSpotComponent* const coverSpot = Cast<UOxiCoverSpotComponent>(CoverSpotList[i].GetComponent(this));
+		if (coverSpot == nullptr)
+		{
+			continue;
+		}
+
+		const FVector coverSpotLocation = coverSpot->GetComponentLocation();
+		const FVector coverSpotDirection = coverSpot->GetComponentRotation().Vector();
+
+		DrawDebugSphere(GetWorld(), coverSpotLocation, debugSphereRadius, 16, FColor::Green);
+		DrawDebugDirectionalArrow(GetWorld(), coverSpotLocation, coverSpotLocation + coverSpotDirection * debugArrowLength, debugArrowSize, FColor::Red, false, -1.0f, 0, debugArrowThickness);
+
+		if (coverDebug == 0)
+		{
+			continue;
+		}
+
+		FColor sphereColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, coverSpot->GetLeftLeanVisibilityToTarget()).ToFColor(false);
+		DrawDebugSphere(GetWorld(), coverSpot->GetLeanLeftFirePoint(), debugSphereRadius, 16, sphereColor);
+
+		sphereColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, coverSpot->GetRightLeanVisibilityToTarget()).ToFColor(false);
+		DrawDebugSphere(GetWorld(), coverSpot->GetLeanRightFirePoint(), debugSphereRadius, 16, sphereColor);
+	}
 }
 
 /**

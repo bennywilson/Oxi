@@ -7,7 +7,6 @@
 #include "Components/ArrowComponent.h"
 #include "OxiCover.generated.h"
 
-
 /**
  *
  */
@@ -19,6 +18,16 @@ enum class EOxiCoverProtectionLevel
 	Medium,
 	Low,
 	Broken
+};
+
+/**
+ *
+ */
+struct FDebugTraceData
+{
+	FVector Start;
+	FVector End;
+	bool HitSomething;
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnProtectionLevel, class AOxiCover* const, EOxiCoverProtectionLevel);
@@ -41,6 +50,8 @@ class OXI_API UOxiCoverSpotComponent : public UArrowComponent
 	float GetLeftLeanVisibilityToTarget() const { return LeftLeanVisibilityToTarget; }
 	float GetRightLeanVisibilityToTarget() const { return RightLeanVisibilityToTarget; }
 
+	TArray<FDebugTraceData>& GetDebugTraceDataList() { return DebugTraceDataList; }
+
 protected:
 
 	TArray<FTraceHandle>& GetVisibilityHandles() { return VisibilityTraceHandles; }
@@ -51,6 +62,8 @@ protected:
 private:
 	FVector LeanLeftWorldFirePoint;
 	FVector LeanRightWorldFirePoint;
+
+	TArray<FDebugTraceData> DebugTraceDataList;
 
 	TArray<FTraceHandle> VisibilityTraceHandles;
 	float LeftLeanVisibilityToTarget;
@@ -117,6 +130,11 @@ protected:
 	TArray<UOxiCoverSpotComponent*> CoverSpots;
 
 private:
+
+	void UpdateVisTraces();
+
+	void DebugDrawCoverInfo();
+
 	UPROPERTY(Transient)
 	TArray<AOxiCharacter*> CurrentUsers;
 

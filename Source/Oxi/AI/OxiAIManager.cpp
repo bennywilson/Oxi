@@ -11,6 +11,7 @@ DEFINE_LOG_CATEGORY(LogOxiAI);
 /** Toggles onscreen AI debugging information */
 TAutoConsoleVariable<int32> CVarCoverDebug(
 	TEXT("oxi.coverdebug"),
+
 	-1,
 	TEXT("Show debug cover info. 0 Shows all.  Otherwise the # indicates a specific cover to display"),
 	ECVF_Cheat
@@ -22,11 +23,6 @@ TAutoConsoleVariable<int32> CVarCoverSpotDebug(
 	TEXT("Show debug cover spot info. 0 Shows all.  Otherwise the # indicates a specific cover spor to display"),
 	ECVF_Cheat
 );
-
-const int g_TileWidth = 16 * 3;
-const int g_HalfTileWidth = g_TileWidth / 2;
-const int g_NumCellsAcross = 3;
-const int g_HalfNumCellsAcross = g_NumCellsAcross / 2;
 
 /**
  *
@@ -200,13 +196,16 @@ void UOxiAIManager::Tick(float DeltaTime)
 		return;
 	}
 
-	// Line Traces
-	UpdateLineTraces();
+	CurrentCoverVisTest++;
+	if (CurrentCoverVisTest > CoverList.Num())
+	{
+		CurrentCoverVisTest = 1;
+	}
 
 	// Debug Drawing
 	DrawDebugInfo();
 
-	// Debug Drawing
+	DebugDrawPlayerCells();
 }
 
 /**
@@ -220,32 +219,37 @@ TStatId UOxiAIManager::GetStatId() const
 /**
  *
  */
-void UOxiAIManager::UpdateLineTraces()
+void UOxiAIManager::DrawDebugInfo()
 {
-	if (CoverList.Num() == 0)
-	{
-		return;
-	}
-
-	if (CurrentCoverToTrace >= CoverList.Num())
-	{
-		CurrentCoverToTrace = 0;
-	}
-
-	AOxiCover* const currCover = CoverList[CurrentCoverToTrace];
-	FVector basePos = PlayerList[0]->GetActorLocation();
-	int xPos = ((int)basePos.X);
-	xPos = xPos - (xPos % g_TileWidth);
-
-	int yPos = ((int)basePos.Y);
-	yPos = yPos - (yPos % g_TileWidth);
-
-	const TArray<UOxiCoverSpotComponent*>& coverSpots = currCover->GetCoverSpots();
 }
 
 /**
  *
  */
-void UOxiAIManager::DrawDebugInfo()
+void UOxiAIManager::DebugDrawPlayerCells()
 {
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+
+	// Draw Player Cells
+	const FVector basePos = PlayerList[0]->GetActorLocation();
+	const int xIdx = ((int)basePos.X);
+	const int yIdx = ((int)basePos.Y);
+
+	const float startOffset = -((VisCellWidth * HalfVisCellsAcross) - (VisCellWidth * 0.5f));
+	
+	for (int y = 0; y < VisCellsAcross; y++)
+	{
+		const float yPos = basePos.Y + startOffset + (y * VisCellWidth);
+		for (int x = 0; x < VisCellsAcross; x++)
+		{
+			const float xPos = basePos.X + startOffset + (x * VisCellWidth);
+
+			UE_LOG(LogTemp, Log, TEXT("[%f %f %f] -- [%f %f %f]"), basePos.X, basePos.Y, basePos.Z, xPos, yPos, basePos.Z);
+
+			DrawDebugBox(GetWorld(), FVector(xPos, yPos, basePos.Z), FVector(HalfVisCellWidth, HalfVisCellWidth, 0), FColor::Green, false, -1.0f, 0, 0.35f);
+		}
+	}
 }

@@ -101,6 +101,10 @@ public:
 
 	TArray<AOxiCover*>& GetCoverList() { return CoverList; }
 
+	uint32 GetNextCoverIndex() const { return NextCoverIndex; }
+
+	uint32 GetCurrentCoverVisTest() const { return CurrentCoverVisTest; }
+
 protected:
 	UPROPERTY(Transient)
 	TArray<AOxiFirstPersonCharacter*> PlayerList;
@@ -118,17 +122,18 @@ protected:
 	virtual TStatId GetStatId() const override;
 
 private:
-	void UpdateLineTraces();
-
 	void DrawDebugInfo();
 
-	uint32 NextCoverIndex = 1;
+	void DebugDrawPlayerCells();
+
+	int32 NextCoverIndex = 1;
+	int32 CurrentCoverVisTest = 1;
 
 public:
-	const static int TileWidth = 16 * 3;
-	const static int HalfTileWidth = TileWidth / 2;
-	const static int NumCellsAcross = 3;
-	const static int HalfNumCellsAcross = NumCellsAcross / 2;
+	const static int VisCellWidth = 16 * 3;
+	const static int HalfVisCellWidth = VisCellWidth / 2;
+	const static int VisCellsAcross = 4;
+	const static int HalfVisCellsAcross = VisCellsAcross / 2;
 };
 
 extern UOxiAIManager * GetOxiAIManager(UObject* const WorldContextObject);
