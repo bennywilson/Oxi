@@ -60,7 +60,7 @@ public:
 	bool HasReachedDestination();
 
 	UFUNCTION(BlueprintCallable)
-	AOxiCover* FindAndAcquireCover();
+	AOxiCover* FindAndAcquireCover(AActor* const Attacker);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	AActor* GetEnemyTarget();

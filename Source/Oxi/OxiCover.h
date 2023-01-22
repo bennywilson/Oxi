@@ -47,7 +47,10 @@ class OXI_API UOxiCoverSpotComponent : public UArrowComponent
 	void SetLeftLeanVisibilityToTarget(const float visibility) { LeftLeanVisibilityToTarget = visibility; }
 	void SetRightLeanVisibilityToTarget(const float visibility) { RightLeanVisibilityToTarget = visibility; }
 
+	UFUNCTION(BlueprintCallable)
 	float GetLeftLeanVisibilityToTarget() const { return LeftLeanVisibilityToTarget; }
+
+	UFUNCTION(BlueprintCallable)
 	float GetRightLeanVisibilityToTarget() const { return RightLeanVisibilityToTarget; }
 
 	TArray<FDebugTraceData>& GetDebugTraceDataList() { return DebugTraceDataList; }

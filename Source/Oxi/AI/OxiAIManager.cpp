@@ -86,7 +86,7 @@ bool AOxiAICharacter::HasReachedDestination()
 /**
  * 
  */
-AOxiCover* AOxiAICharacter::FindAndAcquireCover()
+AOxiCover* AOxiAICharacter::FindAndAcquireCover(AActor* const Attacker)
 {
 	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
 	AOxiCover* const NewCover = AIMgr->FindNearestUnusedCover(GetActorLocation());
@@ -96,7 +96,7 @@ AOxiCover* AOxiAICharacter::FindAndAcquireCover()
 	}
 
 	AcquireCover(NewCover);
-
+	CurrentCoverSpot = NewCover->GetBestCoverSpot(Attacker->GetActorLocation());
 	return NewCover;
 }
 
@@ -110,7 +110,7 @@ void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxi
 	{
 		// Cover is broken. Find new cover
 		ReleaseCover();
-		AOxiCover* const NearestCover = FindAndAcquireCover();
+		AOxiCover* const NearestCover = FindAndAcquireCover(CurrentAICommand.Target);
 		if (NearestCover != nullptr)
 		{
 			// Take Cover
@@ -228,6 +228,11 @@ void UOxiAIManager::DrawDebugInfo()
  */
 void UOxiAIManager::DebugDrawPlayerCells()
 {
+	if (CVarCoverDebug.GetValueOnGameThread() < 0)
+	{
+		return;
+	}
+
 	if (PlayerList.Num() == 0)
 	{
 		return;

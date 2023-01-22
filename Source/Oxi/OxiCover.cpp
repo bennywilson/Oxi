@@ -100,8 +100,6 @@ void AOxiCover::Tick(float DeltaTime)
 
 	UpdateVisTraces();
 
-
-
 	DebugDrawCoverInfo();
 }
 

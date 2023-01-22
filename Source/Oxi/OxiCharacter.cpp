@@ -89,6 +89,8 @@ bool AOxiCharacter::AcquireCover(AOxiCover* const Cover)
 	if (Cover->AddUser(this))
 	{
 		CurrentCover = Cover;
+
+		check(CurrentCover);
 		return true;
 	}
 

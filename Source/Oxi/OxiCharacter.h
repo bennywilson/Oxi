@@ -83,12 +83,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FName, float> HitBoneToDamageMultiplier;
 
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	AOxiCover* CurrentCover;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	const UOxiCoverSpotComponent* CurrentCoverSpot;
+
 private:
 
 	virtual void OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
-
-	UPROPERTY(Transient)
-	AOxiCover* CurrentCover;
 };
 
 /**
