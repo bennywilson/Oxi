@@ -60,7 +60,7 @@ public:
 	bool HasReachedDestination();
 
 	UFUNCTION(BlueprintCallable)
-	AOxiCover* FindAndAcquireCover(AActor* const Attacker);
+	AOxiCover* FindAndAcquireCover(AActor* const attacker, const FVector searchLocation = FVector::ZeroVector, const float searchRadius = 0.0f);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	AActor* GetEnemyTarget();
@@ -98,6 +98,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AOxiCover* FindNearestUnusedCover(const FVector& TestPoint);
+
+	UFUNCTION(BlueprintCallable)
+	void FindCoverWithinRadius(TArray<AOxiCover*>& cover, const FVector& searchCenter, const float radius);
 
 	TArray<AOxiCover*>& GetCoverList() { return CoverList; }
 

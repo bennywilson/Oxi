@@ -74,6 +74,38 @@ AOxiCover* UOxiAIManager::FindNearestUnusedCover(const FVector& TestPoint)
 /**
  *
  */
+void UOxiAIManager::FindCoverWithinRadius(TArray<AOxiCover*>& cover, const FVector& searchCenter, const float radius)
+{
+	check(cover.Num() == 0);
+
+	const FVector2D searchCenter2D(searchCenter.X, searchCenter.Y);
+	const float radiusSqr = radius * radius;
+
+	for (int iCover = 0; iCover < CoverList.Num(); iCover++)
+	{
+		AOxiCover* const currentCover = CoverList[iCover];
+		if (currentCover->GetNumUsers() > 0)
+		{
+			continue;
+		}
+
+		if (currentCover->GetCoverProtectionLevel() == EOxiCoverProtectionLevel::Broken)
+		{
+			continue;
+		}
+
+		const FVector2D actorLocation2D(currentCover->GetActorLocation().X, currentCover->GetActorLocation().Y);
+		const float CoverDist = FVector2D::DistSquared(searchCenter2D, actorLocation2D);
+		if (CoverDist < radiusSqr)
+		{
+			cover.Add(currentCover);
+		}
+	}
+}
+
+/**
+ *
+ */
 bool AOxiAICharacter::HasReachedDestination()
 {
 	AAIController* const AIController = Cast<AAIController>(GetController());
@@ -86,18 +118,44 @@ bool AOxiAICharacter::HasReachedDestination()
 /**
  * 
  */
-AOxiCover* AOxiAICharacter::FindAndAcquireCover(AActor* const Attacker)
+AOxiCover* AOxiAICharacter::FindAndAcquireCover(AActor* const Attacker, const FVector searchLocation, const float searchRadius)
 {
-	UOxiAIManager* const AIMgr = GetOxiAIManager(this);
-	AOxiCover* const NewCover = AIMgr->FindNearestUnusedCover(GetActorLocation());
-	if (NewCover == nullptr)
+	if (Attacker == nullptr)
 	{
 		return nullptr;
 	}
 
-	AcquireCover(NewCover);
-	CurrentCoverSpot = NewCover->GetBestCoverSpot(Attacker->GetActorLocation());
-	return NewCover;
+	UOxiAIManager* const aiMgr = GetOxiAIManager(this);
+	AOxiCover* coverToAcquire = nullptr;
+	if (searchRadius <= 0.0f)
+	{
+		coverToAcquire = aiMgr->FindNearestUnusedCover(GetActorLocation());
+	}
+	else
+	{
+		if (CVarCoverDebug.GetValueOnGameThread() > 0)
+		{
+			FVector upOffset(0.0f, 0.0f, 16.0f);
+			DrawDebugSphere(GetWorld(), searchLocation + upOffset, 16.0f, 16, FColor(255, 0, 255, 255), false, 5.0f);
+			DrawDebugCircle(GetWorld(), searchLocation + upOffset, searchRadius, 32, FColor(255, 0, 255, 255), false, 5.0f, 0U, 1.0f, FVector(0.0f, 1.0f, 0.0f), FVector(1.0f, 0.0f, 0.0f));
+		}
+
+		TArray<AOxiCover*> validCover;
+		aiMgr->FindCoverWithinRadius(validCover, searchLocation, searchRadius);
+		if (validCover.Num() > 0)
+		{
+			coverToAcquire = validCover[rand() % validCover.Num()];
+		}
+	}
+
+	if (coverToAcquire == nullptr)
+	{
+		return nullptr;
+	}
+
+	AcquireCover(coverToAcquire);
+	CurrentCoverSpot = coverToAcquire->GetBestCoverSpot(Attacker->GetActorLocation());
+	return coverToAcquire;
 }
 
 /**

@@ -119,14 +119,6 @@ void AOxiSquad::Tick(float DeltaTime)
 				DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
 			}
 		}
-
-		if (debugSquadLevel == 1 || debugSquadLevel == 3)
-		{
-			for (int i = 0; i < CurrentSquadMembers.Num(); i++)
-			{
-				CurrentSquadMembers[i]->DebugDraw(debugSquadLevel);
-			}
-		}
 	}
 }
 
@@ -233,8 +225,87 @@ int AOxiSquad::GetNumAliveSquadMembers() const
 /**
  *
  */
+void AOxiSquad::GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers)
+{
+	check(outSquadMembers.Num() == 0);
+
+	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+	{
+		AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
+		UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(SquadMember->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
+		if (DamageComp != nullptr && DamageComp->IsAlive() == false)
+		{
+			continue;
+		}
+		outSquadMembers.Add(SquadMember);
+	}
+}
+
+/**
+ *
+ */
 void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius)
 {
 	UOxiAIManager* const OxiMgr = GetOxiAIManager(this);
 	OutCoverList = OxiMgr->GetCoverList();
+}
+
+/**
+ *
+ */
+void UOxiSquadAction::GetOutermostSquadMembers(TArray<int>& outCharacters, TArray<FVector>& outRightVec, const FVector focusPoint)
+{
+	check(OwningSquad != nullptr);
+
+	TArray<AOxiCharacter*> squadMembers;
+	OwningSquad->GetAliveSquadMembers(squadMembers);
+	if (squadMembers.Num() == 0)
+	{
+		return;
+	}
+
+	FVector2D squadCenter(0.f);
+	for (int i = 0; i < squadMembers.Num(); i++)
+	{
+		const FVector squadMemberPos = squadMembers[i]->GetActorLocation();
+		squadCenter += FVector2D(squadMemberPos.X, squadMemberPos.Y);
+	}
+	squadCenter /= squadMembers.Num();
+
+	const FVector2D focusPoint2D(focusPoint.X, focusPoint.Y);
+	const FVector2D squadToFocusForwardVec = (focusPoint2D - squadCenter).GetSafeNormal();
+	const FVector2D squadToFocusRightVec(squadToFocusForwardVec.Y, squadToFocusForwardVec.X);
+
+	int furthestAlongNegIdx = -1;
+	int furthestAlongPosIdx = -1;
+	float furthestAlongNegDist = std::numeric_limits<float>::max();
+	float futhestAlongPosDist = std::numeric_limits<float>::lowest();
+
+	for (int i = 0; i < squadMembers.Num(); i++)
+	{
+		const AOxiCharacter* curSquadMember = squadMembers[i];
+		const FVector curMemberPos = curSquadMember->GetActorLocation();
+		const FVector2D curMember2DPos(curMemberPos.X, curMemberPos.Y);
+		const FVector2D squadCenterToMember = curMember2DPos - squadCenter;
+		const float distFromCenter = squadCenterToMember.Dot(squadToFocusRightVec);
+
+		if (distFromCenter >= futhestAlongPosDist)
+		{
+			furthestAlongPosIdx = i;
+			futhestAlongPosDist = distFromCenter;
+		}
+
+		if (distFromCenter <= furthestAlongNegDist)
+		{
+			furthestAlongNegIdx = i;
+			furthestAlongNegDist = distFromCenter;
+		}
+	}
+
+	check(furthestAlongPosIdx != -1 && furthestAlongNegDist != -1);
+	outCharacters.Add(furthestAlongPosIdx);
+	outCharacters.Add(furthestAlongNegIdx);
+
+	outRightVec.Add(FVector(squadToFocusRightVec.X, squadToFocusRightVec.Y, 0.0f));
+	outRightVec.Add(FVector(-squadToFocusRightVec.X, -squadToFocusRightVec.Y, 0.0f));
 }

@@ -60,6 +60,7 @@ private:
 	void TickIdleState(const float DeltaTIme);
 
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EOxiSquadState SquadState;
 
@@ -120,4 +121,11 @@ public:
 protected:
 	UFUNCTION(BlueprintCallable)
 	void GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius);
+
+	UFUNCTION(BlueprintCallable)
+	void GetOutermostSquadMembers(TArray<int>& outCharacters, TArray<FVector>& outRightVec, const FVector focusPoint);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadWrite)
+	AOxiSquad* OwningSquad;
 };
