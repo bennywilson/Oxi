@@ -159,25 +159,25 @@ void AOxiSquad::EnterAttackState()
 {
 	check(SquadTargets.Num() > 0);
 
-	if (DefaultSquadActions.Num() == 0)
+	if (DefaultSquadBehaviors.Num() == 0)
 	{
 		return;
 	}
 
 	SquadState = EOxiSquadState::Attack;
 
-	TSubclassOf<UOxiSquadAction> DesiredAction;
-	if (DebugAction.Get() != nullptr)
+	TSubclassOf<UOxiSquadBehavior> DesiredBehavior;
+	if (DebugBehavior.Get() != nullptr)
 	{
-		DesiredAction = DebugAction;
+		DesiredBehavior = DebugBehavior;
 	}
 	else
 	{
-		DesiredAction = DefaultSquadActions[FMath::RandRange(0, DefaultSquadActions.Num() - 1)];
+		DesiredBehavior = DefaultSquadBehaviors[FMath::RandRange(0, DefaultSquadBehaviors.Num() - 1)];
 	}
 
-	CurrentAction = NewObject<UOxiSquadAction>(this, DesiredAction);
-	CurrentAction->StartAction(this);
+	CurrentBehavior = NewObject<UOxiSquadBehavior>(this, DesiredBehavior);
+	CurrentBehavior->StartBehavior(this);
 }
 
 /**
@@ -193,13 +193,13 @@ void AOxiSquad::TickAttackState(const float DeltaTime)
 		{
 			const FVector OldPosition = CurTarget.Location;
 			CurTarget.Location = ActorsLocation;			
-			CurrentAction->OnTargetChangedPosition(CurTarget, OldPosition);
+			CurrentBehavior->OnTargetChangedPosition(CurTarget, OldPosition);
 			break;
 		}
 	}
 
-	check(CurrentAction != nullptr);
-	CurrentAction->TickAction(DeltaTime);
+	check(CurrentBehavior != nullptr);
+	CurrentBehavior->TickBehavior(DeltaTime);
 }
 
 /**
@@ -244,7 +244,7 @@ void AOxiSquad::GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers)
 /**
  *
  */
-void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius)
+void UOxiSquadBehavior::GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const FVector& TestPoint, const float radius)
 {
 	UOxiAIManager* const OxiMgr = GetOxiAIManager(this);
 	OutCoverList = OxiMgr->GetCoverList();
@@ -253,7 +253,7 @@ void UOxiSquadAction::GetCoverInRadius(TArray<AOxiCover*>& OutCoverList, const F
 /**
  *
  */
-void UOxiSquadAction::GetOutermostSquadMembers(TArray<int>& outCharacters, TArray<FVector>& outRightVec, const FVector focusPoint)
+void UOxiSquadBehavior::GetOutermostSquadMembers(TArray<int>& outCharacters, TArray<FVector>& outRightVec, const FVector focusPoint)
 {
 	check(OwningSquad != nullptr);
 
