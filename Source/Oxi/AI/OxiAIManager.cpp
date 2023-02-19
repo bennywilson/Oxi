@@ -38,37 +38,39 @@ UOxiAIManager* GetOxiAIManager(UObject* const WorldContextObject)
 /**
  *
  */
-AOxiCover* UOxiAIManager::FindNearestUnusedCover(const FVector& TestPoint)
+AOxiCover* UOxiAIManager::FindNearestUnusedCover(const FVector& testPoint)
 {
-	float ClosestCoverDist = FLT_MAX;
-	int ClosestCoverIdx = -1;
+	const FVector2D testPt2D(testPoint.X, testPoint.Y);
+	float closestCoverDistSqr = FLT_MAX;
+	int closestCoverIdx = -1;
 	for (int iCover = 0; iCover < CoverList.Num(); iCover++)
 	{
-		AOxiCover* const CurrentCover = CoverList[iCover];
-		if (CurrentCover->GetNumUsers() > 0)
+		AOxiCover* const currentCover = CoverList[iCover];
+		if (currentCover->GetNumUsers() > 0)
 		{
 			continue;
 		}
 
-		if (CurrentCover->GetCoverProtectionLevel() == EOxiCoverProtectionLevel::Broken)
+		if (currentCover->GetCoverProtectionLevel() == EOxiCoverProtectionLevel::Broken)
 		{
 			continue;
 		}
 
-		const float CoverDist = FVector::Dist(CurrentCover->GetActorLocation(), TestPoint);
-		if (CoverDist < ClosestCoverDist)
+		const FVector2D currCoverPt2D(currentCover->GetActorLocation().X, currentCover->GetActorLocation().Y);
+		const float coverDistSqr = FVector2D::DistSquared(currCoverPt2D, testPt2D);
+		if (coverDistSqr < closestCoverDistSqr)
 		{
-			ClosestCoverIdx = iCover;
-			ClosestCoverDist = CoverDist;
+			closestCoverIdx = iCover;
+			closestCoverDistSqr = coverDistSqr;
 		}
 	}
 
-	if (ClosestCoverIdx == -1)
+	if (closestCoverIdx == -1)
 	{
 		return nullptr;
 	}
 
-	return CoverList[ClosestCoverIdx];
+	return CoverList[closestCoverIdx];
 }
 
 /**

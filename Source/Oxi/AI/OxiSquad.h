@@ -52,6 +52,9 @@ public:
 	int GetNumSquadMembers() const { return CurrentSquadMembers.Num(); }
 	int GetNumAliveSquadMembers() const;
 
+	const TArray<AOxiCharacter*>& GetSquadMembers() const { return CurrentSquadMembers; }
+	void GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers);
+
 private:
 	void SquadMemberKilledCB(UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState();
@@ -69,19 +72,19 @@ protected:
 
 	// Actions squad will take if the other lists are empty or their conditions haven't been met
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadAction>> DefaultSquadActions;
+	TArray<TSubclassOf<UOxiSquadBehavior>> DefaultSquadBehaviors;
 
 	// Actions squad will take at the beginning of battle
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadAction>> InitialSquadActions;
+	TArray<TSubclassOf<UOxiSquadBehavior>> InitialSquadBehaviors;
 
 	// Actions squad will take when desperate (ex. losing the fight, low morale, etc)
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadAction>> DesperateSquadActions;
+	TArray<TSubclassOf<UOxiSquadBehavior>> DesperateSquadBehaviors;
 
 	// Actions squad will take when winning (ex. player is hurt, high morale, etc)
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadAction>> ConfidentSquadActions;
+	TArray<TSubclassOf<UOxiSquadBehavior>> ConfidentSquadBehaviors;
 
 	// If a target leaves this radius, they are considered to have changed positions and the squad may call a new action
 	UPROPERTY(EditAnywhere)
@@ -94,26 +97,26 @@ protected:
 	TArray<AOxiCharacter*> CurrentSquadMembers;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UOxiSquadAction> DebugAction;
+	TSubclassOf<UOxiSquadBehavior> DebugBehavior;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UOxiSquadAction* CurrentAction;
+	UOxiSquadBehavior* CurrentBehavior;
 };
 
 /**
  *
  */
 UCLASS(Blueprintable, BlueprintType)
-class OXI_API UOxiSquadAction : public UObject
+class OXI_API UOxiSquadBehavior : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void StartAction(AOxiSquad* OxiSquad);
+	void StartBehavior(AOxiSquad* OxiSquad);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void TickAction(const float DeltaTime);
+	void TickBehavior(const float DeltaTime);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTargetChangedPosition(const FOxiSquadTarget& Target, const FVector oldPosition);
