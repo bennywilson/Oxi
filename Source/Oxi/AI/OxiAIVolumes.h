@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "OxiCharacter.h"
 #include "OxiAIManager.h"
+#include "OxiSquad.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "OxiAIVolumes.generated.h"
 
@@ -75,6 +76,9 @@ private:
 
 	UPROPERTY()
 	EAISpawnSquadTriggerCondition SpawnCondition;
+
+	UPROPERTY(EditAnywhere)
+	struct FOxiSquadBehaviorContexts BehaviorOverrides;
 
 	UPROPERTY(Transient)
 	class AOxiSquad* Squad;

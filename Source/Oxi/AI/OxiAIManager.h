@@ -41,7 +41,7 @@ struct FOxiAICommandData
 	AActor* Target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* Goal;
+	FVector TargetPosition;
 };
 
 /**

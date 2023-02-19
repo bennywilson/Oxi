@@ -84,13 +84,15 @@ void AOxiCharacter::OnDeath(UOxiDamageComponent* const DamageComp, AActor* const
 /**
  *
  */
-bool AOxiCharacter::AcquireCover(AOxiCover* const Cover)
+bool AOxiCharacter::AcquireCover(AOxiCover* const cover, const FVector threatLocation)
 {
-	if (Cover->AddUser(this))
+	if (cover->AddUser(this))
 	{
-		CurrentCover = Cover;
+		CurrentCover = cover;
 
 		check(CurrentCover);
+
+		CurrentCoverSpot = cover->GetBestCoverSpot(threatLocation);
 		return true;
 	}
 

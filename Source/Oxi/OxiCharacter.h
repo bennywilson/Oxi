@@ -60,7 +60,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	bool AcquireCover(AOxiCover* const Cover);
+	bool AcquireCover(AOxiCover* const Cover, FVector threatLocation);
 
 	UFUNCTION(BlueprintCallable)
 	void ReleaseCover();

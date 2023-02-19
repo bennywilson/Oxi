@@ -118,6 +118,8 @@ void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
 	}
 	Squad = Cast<AOxiSquad>(GWorld->SpawnActor(SquadType, &SpawnLoc, &SpawnRot));
 
+	Squad->ApplyBehaviorOverrides(BehaviorOverrides);
+
 	for (int i = 0; i < SquadMembersToSpawn.Num(); i++)
 	{
 		if (SquadMembersToSpawn[i] == nullptr)

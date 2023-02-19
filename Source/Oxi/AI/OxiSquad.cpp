@@ -159,7 +159,7 @@ void AOxiSquad::EnterAttackState()
 {
 	check(SquadTargets.Num() > 0);
 
-	if (DefaultSquadBehaviors.Num() == 0)
+	if (BehaviorContexts.DefaultSquadBehaviors.Num() == 0)
 	{
 		return;
 	}
@@ -173,7 +173,7 @@ void AOxiSquad::EnterAttackState()
 	}
 	else
 	{
-		DesiredBehavior = DefaultSquadBehaviors[FMath::RandRange(0, DefaultSquadBehaviors.Num() - 1)];
+		DesiredBehavior = BehaviorContexts.DefaultSquadBehaviors[FMath::RandRange(0, BehaviorContexts.DefaultSquadBehaviors.Num() - 1)];
 	}
 
 	CurrentBehavior = NewObject<UOxiSquadBehavior>(this, DesiredBehavior);
@@ -240,6 +240,7 @@ void AOxiSquad::GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers)
 		outSquadMembers.Add(SquadMember);
 	}
 }
+
 
 /**
  *

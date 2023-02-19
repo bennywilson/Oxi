@@ -34,6 +34,51 @@ struct FOxiSquadTarget
 	FVector Location;
 };
 
+USTRUCT(BlueprintType)
+struct FOxiSquadBehaviorContexts
+{
+	GENERATED_BODY()
+
+	// Actions squad will take if the other lists are empty or their conditions haven't been met	
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UOxiSquadBehavior>> DefaultSquadBehaviors;
+
+	// Actions squad will take at the beginning of battle
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UOxiSquadBehavior>> InitialSquadBehaviors;
+
+	// Actions squad will take when desperate (ex. losing the fight, low morale, etc)
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UOxiSquadBehavior>> DesperateSquadBehaviors;
+
+	// Actions squad will take when winning (ex. player is hurt, high morale, etc)
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UOxiSquadBehavior>> ConfidentSquadBehaviors;
+
+	void ApplyOverrides(const FOxiSquadBehaviorContexts& behaviorOverrides)
+	{
+		if (behaviorOverrides.DefaultSquadBehaviors.Num() > 0)
+		{
+			DefaultSquadBehaviors = behaviorOverrides.DefaultSquadBehaviors;
+		}
+
+		if (behaviorOverrides.InitialSquadBehaviors.Num() > 0)
+		{
+			InitialSquadBehaviors = behaviorOverrides.InitialSquadBehaviors;
+		}
+
+		if (behaviorOverrides.DesperateSquadBehaviors.Num() > 0)
+		{
+			DesperateSquadBehaviors = behaviorOverrides.DesperateSquadBehaviors;
+		}
+
+		if (behaviorOverrides.ConfidentSquadBehaviors.Num() > 0)
+		{
+			ConfidentSquadBehaviors = behaviorOverrides.ConfidentSquadBehaviors;
+		}
+	}
+};
+
 UCLASS(BlueprintType)
 class OXI_API AOxiSquad : public AActor
 {
@@ -55,6 +100,7 @@ public:
 	const TArray<AOxiCharacter*>& GetSquadMembers() const { return CurrentSquadMembers; }
 	void GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers);
 
+	void ApplyBehaviorOverrides(const FOxiSquadBehaviorContexts& overrides) { BehaviorContexts.ApplyOverrides(overrides); }
 private:
 	void SquadMemberKilledCB(UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState();
@@ -70,21 +116,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PerceptionRadius;
 
-	// Actions squad will take if the other lists are empty or their conditions haven't been met
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadBehavior>> DefaultSquadBehaviors;
-
-	// Actions squad will take at the beginning of battle
-	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadBehavior>> InitialSquadBehaviors;
-
-	// Actions squad will take when desperate (ex. losing the fight, low morale, etc)
-	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadBehavior>> DesperateSquadBehaviors;
-
-	// Actions squad will take when winning (ex. player is hurt, high morale, etc)
-	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<UOxiSquadBehavior>> ConfidentSquadBehaviors;
+	FOxiSquadBehaviorContexts BehaviorContexts;
 
 	// If a target leaves this radius, they are considered to have changed positions and the squad may call a new action
 	UPROPERTY(EditAnywhere)

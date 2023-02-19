@@ -155,8 +155,8 @@ AOxiCover* AOxiAICharacter::FindAndAcquireCover(AActor* const Attacker, const FV
 		return nullptr;
 	}
 
-	AcquireCover(coverToAcquire);
-	CurrentCoverSpot = coverToAcquire->GetBestCoverSpot(Attacker->GetActorLocation());
+	AcquireCover(coverToAcquire, Attacker->GetActorLocation());
+
 	return coverToAcquire;
 }
 
@@ -176,8 +176,8 @@ void AOxiAICharacter::OnCoverProtectionLevelChanged(AOxiCover* const Cover, EOxi
 			// Take Cover
 			FOxiAICommandData AICommandData;
 			AICommandData.AICommand = EOxiAICommand::TakeCover;
-			AICommandData.Target = CurrentAICommand.Target;
-			AICommandData.Goal = NearestCover;
+			AICommandData.Target = NearestCover;// CurrentAICommand.Target;
+//			AICommandData.Goal = NearestCover;
 
 			IssueAICommand(AICommandData);
 		}
