@@ -108,6 +108,34 @@ void UOxiAIManager::FindCoverWithinRadius(TArray<AOxiCover*>& cover, const FVect
 /**
  *
  */
+bool AOxiAICharacter::IssueFutureAICommand(const FOxiAICommandData& CommandData, const float secondsInTheFuture)
+{
+	FutureAICommandTimerDel.BindUFunction(this, FName("DoFutureAICommandCallback"), CommandData);
+
+	if (FutureAICommandTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(FutureAICommandTimerHandle);
+	}
+	GetWorld()->GetTimerManager().SetTimer(FutureAICommandTimerHandle, FutureAICommandTimerDel, secondsInTheFuture, false);
+
+	return true;
+}
+
+/**
+ *
+ */
+void AOxiAICharacter::DoFutureAICommandCallback(const FOxiAICommandData& CommandData)
+{
+	if (FutureAICommandTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(FutureAICommandTimerHandle);
+	}
+	IssueAICommand(CommandData);
+}
+
+/**
+ *
+ */
 bool AOxiAICharacter::HasReachedDestination()
 {
 	AAIController* const AIController = Cast<AAIController>(GetController());

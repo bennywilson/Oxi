@@ -57,6 +57,9 @@ public:
 	bool IssueAICommand(const FOxiAICommandData& CommandData);
 
 	UFUNCTION(BlueprintCallable)
+	bool IssueFutureAICommand(const FOxiAICommandData& CommandData, const float secondsInTheFuture);
+
+	UFUNCTION(BlueprintCallable)
 	bool HasReachedDestination();
 
 	UFUNCTION(BlueprintCallable)
@@ -68,9 +71,15 @@ public:
 protected:
 	virtual void OnCoverProtectionLevelChanged(AOxiCover* const, EOxiCoverProtectionLevel) override;
 
+	UFUNCTION()
+	void DoFutureAICommandCallback(const FOxiAICommandData& CommandData);
+
 protected:
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FOxiAICommandData CurrentAICommand;
+
+	FTimerDelegate FutureAICommandTimerDel;
+	FTimerHandle FutureAICommandTimerHandle;
 };
 
 /**
