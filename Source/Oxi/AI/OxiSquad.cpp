@@ -264,12 +264,13 @@ void UOxiSquadBehavior::GetOutermostSquadMembers(TArray<int>& outCharacters, TAr
 	{
 		return;
 	}
-
+	
+	// Get the mid point of the squad members
 	FVector2D squadCenter(0.f);
 	for (int i = 0; i < squadMembers.Num(); i++)
 	{
-		const FVector squadMemberPos = squadMembers[i]->GetActorLocation();
-		squadCenter += FVector2D(squadMemberPos.X, squadMemberPos.Y);
+		const FVector2D squadMember2DPos(squadMembers[i]->GetActorLocation());
+		squadCenter += squadMember2DPos;
 	}
 	squadCenter /= squadMembers.Num();
 
@@ -285,21 +286,20 @@ void UOxiSquadBehavior::GetOutermostSquadMembers(TArray<int>& outCharacters, TAr
 	for (int i = 0; i < squadMembers.Num(); i++)
 	{
 		const AOxiCharacter* curSquadMember = squadMembers[i];
-		const FVector curMemberPos = curSquadMember->GetActorLocation();
-		const FVector2D curMember2DPos(curMemberPos.X, curMemberPos.Y);
+		const FVector2D curMember2DPos(curSquadMember->GetActorLocation());
 		const FVector2D squadCenterToMember = curMember2DPos - squadCenter;
-		const float distFromCenter = squadCenterToMember.Dot(squadToFocusRightVec);
+		const float distSqrFromCenter = squadCenterToMember.Dot(squadToFocusRightVec);
 
-		if (distFromCenter >= futhestAlongPosDist)
+		if (distSqrFromCenter >= futhestAlongPosDist)
 		{
 			furthestAlongPosIdx = i;
-			futhestAlongPosDist = distFromCenter;
+			futhestAlongPosDist = distSqrFromCenter;
 		}
 
-		if (distFromCenter <= furthestAlongNegDist)
+		if (distSqrFromCenter <= furthestAlongNegDist)
 		{
 			furthestAlongNegIdx = i;
-			furthestAlongNegDist = distFromCenter;
+			furthestAlongNegDist = distSqrFromCenter;
 		}
 	}
 
