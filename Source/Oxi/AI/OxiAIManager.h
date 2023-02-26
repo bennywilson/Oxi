@@ -64,6 +64,9 @@ public:
 	bool HasReachedDestination();
 
 	UFUNCTION(BlueprintCallable)
+	FVector GetPathDestination();
+
+	UFUNCTION(BlueprintCallable)
 	AOxiCover* FindAndAcquireCover(AActor* const attacker, const FVector searchLocation = FVector::ZeroVector, const float searchRadius = 0.0f);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)

@@ -16,6 +16,7 @@ static TAutoConsoleVariable<int32> CVarAbilityDebug(
 UOxiAbility::UOxiAbility()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 /**
@@ -27,6 +28,7 @@ void UOxiAbility::BeginPlay()
 	check(MinCoolDownSec >= 0 && MaxCoolDownSec >= MinCoolDownSec);
 
 	AbilityState = EOxiAbilityState::Ready;
+	SetActive(false);
 }
 
 /**

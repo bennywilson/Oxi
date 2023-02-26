@@ -146,6 +146,19 @@ bool AOxiAICharacter::HasReachedDestination()
 }
 
 /**
+ *
+ */
+FVector AOxiAICharacter::GetPathDestination()
+{
+	AAIController* const AIController = Cast<AAIController>(GetController());
+	check(AIController);
+
+	const UPathFollowingComponent* const PathComponent = AIController->GetPathFollowingComponent();
+	return PathComponent->GetPathDestination();
+}
+
+
+/**
  * 
  */
 AOxiCover* AOxiAICharacter::FindAndAcquireCover(AActor* const Attacker, const FVector searchLocation, const float searchRadius)
