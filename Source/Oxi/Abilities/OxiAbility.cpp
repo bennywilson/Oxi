@@ -3,6 +3,13 @@
 
 #include "Abilities/OxiAbility.h"
 
+static TAutoConsoleVariable<int32> CVarAbilityDebug(
+	TEXT("oxi.abilityDebug"),
+	0,
+	TEXT("Show debug squad indo"),
+	ECVF_Cheat
+);
+
 /**
  *
  */
@@ -17,7 +24,9 @@ UOxiAbility::UOxiAbility()
 void UOxiAbility::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	check(MinCoolDownSec >= 0 && MaxCoolDownSec >= MinCoolDownSec);
+
+	AbilityState = EOxiAbilityState::Ready;
 }
 
 /**
@@ -28,3 +37,133 @@ void UOxiAbility::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+/**
+ *
+ */
+EOxiAbilityFailReason UOxiAbility::StartAbility()
+{
+	if (AbilityState == EOxiAbilityState::CoolDown)
+	{
+		return EOxiAbilityFailReason::CoolDown;
+	}
+
+	if (AbilityState == EOxiAbilityState::Running)
+	{
+		return EOxiAbilityFailReason::AlreadyRunning;
+	}
+
+	AbilityStartTime = GetWorld()->GetTimeSeconds();
+	AbilityState = EOxiAbilityState::Running;
+
+	DurationTimerDelegate.BindUFunction(this, FName("StopAbility"), EOxiAbilityStopReason::Finished);
+
+	if (DurationTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(DurationTimerHandle);
+	}
+
+	const float abilityDurationSec = FMath::RandRange(MinDurationSec, MaxDurationSec);
+	GetWorld()->GetTimerManager().SetTimer(DurationTimerHandle, DurationTimerDelegate, abilityDurationSec, false);
+
+	StartAbility_Internal();
+
+	return EOxiAbilityFailReason::Succeeded;
+}
+
+/**
+ *
+ */
+void UOxiAbility::StopAbility(const EOxiAbilityStopReason stopReason)
+{
+	StopAbility_Internal(stopReason);
+
+	const float coolDownTime = FMath::RandRange(MinCoolDownSec, MaxCoolDownSec);
+	if (coolDownTime > 0)
+	{
+		AbilityState = EOxiAbilityState::CoolDown;
+		CoolDownTimerDelegate.BindUFunction(this, FName("CooldownFinishedCB"));
+
+		if (CoolDownTimerHandle.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(CoolDownTimerHandle);
+		}
+
+		GetWorld()->GetTimerManager().SetTimer(CoolDownTimerHandle, CoolDownTimerDelegate, coolDownTime, false);
+
+	}
+	else
+	{
+		AbilityState = EOxiAbilityState::Ready;
+	}
+	AbilityStartTime = 0;
+}
+
+/**
+ *
+ */
+void UOxiAbility::CoolDownFinishedCB()
+{
+	AbilityState = EOxiAbilityState::Ready;
+	CoolDownFinished_Internal();
+}
+
+/**
+ *
+ */
+UOxiAbilitySystem::UOxiAbilitySystem()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+/**
+ *
+ */
+void UOxiAbilitySystem::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
+/**
+ *
+ */
+void UOxiAbilitySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+/**
+ *
+ */
+const UOxiAbility* UOxiAbilitySystem::GetAbilityByType(const EOxiAbilityType abilityType)
+{
+	for (int i = 0; i < AbilitiesList.Num(); i++)
+	{ 
+		const UOxiAbility* const curAbility = AbilitiesList[i];
+		if (curAbility->GetAbilityType() == abilityType)
+		{
+			return curAbility;
+		}
+	}
+
+	return nullptr;
+}
+
+/**
+ *
+ */
+TArray<UOxiAbility*> UOxiAbilitySystem::GetAbilitiesByType(const EOxiAbilityType abilityType)
+{
+	TArray<UOxiAbility*> returnList;
+
+	for (int i = 0; i < AbilitiesList.Num(); i++)
+	{
+		UOxiAbility* const curAbility = AbilitiesList[i];
+		if (curAbility->GetAbilityType() == abilityType)
+		{
+			returnList.Add(curAbility);
+		}
+	}
+
+	return returnList;
+}
