@@ -68,6 +68,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopAbility(const EOxiAbilityStopReason stopReason);
 
+	UFUNCTION(BlueprintCallable)
+	float GetNormalizedRunningTime();
+
 	EOxiAbilityType GetAbilityType() const { return AbilityType; }
 
 	EOxiAbilityState GetAbilityState() const { return AbilityState; }
@@ -103,7 +106,13 @@ protected:
 	float MaxDurationSec;
 
 	UPROPERTY(Transient)
-	float AbilityStartTime;
+	float AbilityStartTimeSec;
+
+	UPROPERTY(Transient)
+	float AbilityDurationSec;
+
+	UPROPERTY(Transient)
+	float CoolDownStartTime;
 
 	UPROPERTY(Transient)
 	EOxiAbilityState AbilityState;

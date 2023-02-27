@@ -54,7 +54,7 @@ EOxiAbilityFailReason UOxiAbility::StartAbility()
 		return EOxiAbilityFailReason::AlreadyRunning;
 	}
 
-	AbilityStartTime = GetWorld()->GetTimeSeconds();
+	AbilityStartTimeSec = GetWorld()->GetTimeSeconds();
 	AbilityState = EOxiAbilityState::Running;
 
 	DurationTimerDelegate.BindUFunction(this, FName("StopAbility"), EOxiAbilityStopReason::Finished);
@@ -64,8 +64,8 @@ EOxiAbilityFailReason UOxiAbility::StartAbility()
 		GetWorld()->GetTimerManager().ClearTimer(DurationTimerHandle);
 	}
 
-	const float abilityDurationSec = FMath::RandRange(MinDurationSec, MaxDurationSec);
-	GetWorld()->GetTimerManager().SetTimer(DurationTimerHandle, DurationTimerDelegate, abilityDurationSec, false);
+	AbilityDurationSec = FMath::RandRange(MinDurationSec, MaxDurationSec);
+	GetWorld()->GetTimerManager().SetTimer(DurationTimerHandle, DurationTimerDelegate, AbilityDurationSec, false);
 
 	StartAbility_Internal();
 
@@ -90,6 +90,7 @@ void UOxiAbility::StopAbility(const EOxiAbilityStopReason stopReason)
 			GetWorld()->GetTimerManager().ClearTimer(CoolDownTimerHandle);
 		}
 
+		CoolDownStartTime = GetWorld()->GetTimeSeconds();
 		GetWorld()->GetTimerManager().SetTimer(CoolDownTimerHandle, CoolDownTimerDelegate, coolDownTime, false);
 
 	}
@@ -97,7 +98,7 @@ void UOxiAbility::StopAbility(const EOxiAbilityStopReason stopReason)
 	{
 		AbilityState = EOxiAbilityState::Ready;
 	}
-	AbilityStartTime = 0;
+	AbilityStartTimeSec = 0;
 }
 
 /**
@@ -107,6 +108,30 @@ void UOxiAbility::CoolDownFinishedCB()
 {
 	AbilityState = EOxiAbilityState::Ready;
 	CoolDownFinished_Internal();
+}
+
+/**
+ *
+ */
+float UOxiAbility::GetNormalizedRunningTime()
+{
+	if (AbilityState == EOxiAbilityState::Ready)
+	{
+		return 0.0f;
+	}
+
+	if (AbilityState == EOxiAbilityState::CoolDown)
+	{
+		return 1.0f;
+	}
+
+	if (AbilityDurationSec <= 0.0f)
+	{
+		return 1.0f;
+	}
+
+	const float curTime = GetWorld()->GetTimeSeconds();
+	return (curTime - AbilityStartTimeSec) / AbilityDurationSec;
 }
 
 /**
