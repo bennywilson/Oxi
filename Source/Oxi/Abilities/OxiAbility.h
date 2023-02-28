@@ -15,7 +15,8 @@ enum class EOxiAbilityState : uint8
 {
 	Ready,
 	CoolDown,
-	Running
+	Running,
+	ChargeCoolDown
 };
 
 /**
@@ -85,6 +86,9 @@ protected:
 	void StopAbility_Internal(const EOxiAbilityStopReason stopReason);
 
 	UFUNCTION()
+	void ChargeCoolDownFinishedCB();
+
+	UFUNCTION()
 	void CoolDownFinishedCB();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -105,6 +109,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float MaxDurationSec;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int MaxNumCharges;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SecondsBetweenCharges;
+
 	UPROPERTY(Transient)
 	float AbilityStartTimeSec;
 
@@ -113,6 +123,9 @@ protected:
 
 	UPROPERTY(Transient)
 	float CoolDownStartTime;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int CurrentNumOfCharges;
 
 	UPROPERTY(Transient)
 	EOxiAbilityState AbilityState;
@@ -123,6 +136,9 @@ private:
 
 	FTimerDelegate CoolDownTimerDelegate;
 	FTimerHandle CoolDownTimerHandle;
+
+	FTimerDelegate ChargeCoolDownTimerDelegate;
+	FTimerHandle ChargeCoolDownTimerHandle;
 };
 
 /**

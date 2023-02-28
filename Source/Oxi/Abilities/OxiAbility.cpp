@@ -28,6 +28,7 @@ void UOxiAbility::BeginPlay()
 	check(MinCoolDownSec >= 0 && MaxCoolDownSec >= MinCoolDownSec);
 
 	AbilityState = EOxiAbilityState::Ready;
+	CurrentNumOfCharges = MaxNumCharges;
 	SetActive(false);
 }
 
@@ -44,7 +45,7 @@ void UOxiAbility::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
  */
 EOxiAbilityFailReason UOxiAbility::StartAbility()
 {
-	if (AbilityState == EOxiAbilityState::CoolDown)
+	if (AbilityState == EOxiAbilityState::CoolDown || AbilityState == EOxiAbilityState::ChargeCoolDown)
 	{
 		return EOxiAbilityFailReason::CoolDown;
 	}
@@ -67,6 +68,11 @@ EOxiAbilityFailReason UOxiAbility::StartAbility()
 	AbilityDurationSec = FMath::RandRange(MinDurationSec, MaxDurationSec);
 	GetWorld()->GetTimerManager().SetTimer(DurationTimerHandle, DurationTimerDelegate, AbilityDurationSec, false);
 
+	if (MaxNumCharges > 0)
+	{
+		CurrentNumOfCharges--;
+	}
+
 	StartAbility_Internal();
 
 	return EOxiAbilityFailReason::Succeeded;
@@ -79,24 +85,45 @@ void UOxiAbility::StopAbility(const EOxiAbilityStopReason stopReason)
 {
 	StopAbility_Internal(stopReason);
 
-	const float coolDownTime = FMath::RandRange(MinCoolDownSec, MaxCoolDownSec);
-	if (coolDownTime > 0)
-	{
-		AbilityState = EOxiAbilityState::CoolDown;
-		CoolDownTimerDelegate.BindUFunction(this, FName("CooldownFinishedCB"));
-
-		if (CoolDownTimerHandle.IsValid())
+	if (CurrentNumOfCharges > 0)
+	{ 
+		if (SecondsBetweenCharges > 0)
 		{
-			GetWorld()->GetTimerManager().ClearTimer(CoolDownTimerHandle);
+			AbilityState = EOxiAbilityState::ChargeCoolDown;
+			ChargeCoolDownTimerDelegate.BindUFunction(this, FName("ChargeCoolDownFinishedCB"));
+
+			if (ChargeCoolDownTimerHandle.IsValid())
+			{
+				GetWorld()->GetTimerManager().ClearTimer(ChargeCoolDownTimerHandle);
+			}
+			GetWorld()->GetTimerManager().SetTimer(ChargeCoolDownTimerHandle, ChargeCoolDownTimerDelegate, SecondsBetweenCharges, false);
 		}
-
-		CoolDownStartTime = GetWorld()->GetTimeSeconds();
-		GetWorld()->GetTimerManager().SetTimer(CoolDownTimerHandle, CoolDownTimerDelegate, coolDownTime, false);
-
+		else
+		{
+			AbilityState = EOxiAbilityState::Ready;
+		}
 	}
 	else
 	{
-		AbilityState = EOxiAbilityState::Ready;
+		const float coolDownTime = FMath::RandRange(MinCoolDownSec, MaxCoolDownSec);
+		if (coolDownTime > 0)
+		{
+			AbilityState = EOxiAbilityState::CoolDown;
+			CoolDownTimerDelegate.BindUFunction(this, FName("CooldownFinishedCB"));
+
+			if (CoolDownTimerHandle.IsValid())
+			{
+				GetWorld()->GetTimerManager().ClearTimer(CoolDownTimerHandle);
+			}
+
+			CoolDownStartTime = GetWorld()->GetTimeSeconds();
+			GetWorld()->GetTimerManager().SetTimer(CoolDownTimerHandle, CoolDownTimerDelegate, coolDownTime, false);
+
+		}
+		else
+		{
+			AbilityState = EOxiAbilityState::Ready;
+		}
 	}
 	AbilityStartTimeSec = 0;
 }
@@ -108,6 +135,14 @@ void UOxiAbility::CoolDownFinishedCB()
 {
 	AbilityState = EOxiAbilityState::Ready;
 	CoolDownFinished_Internal();
+}
+
+/**
+ *
+ */
+void UOxiAbility::ChargeCoolDownFinishedCB()
+{
+	AbilityState = EOxiAbilityState::Ready;
 }
 
 /**

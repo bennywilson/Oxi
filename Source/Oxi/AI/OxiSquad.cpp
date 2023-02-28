@@ -176,6 +176,7 @@ void AOxiSquad::EnterAttackState()
 		DesiredBehavior = BehaviorContexts.DefaultSquadBehaviors[FMath::RandRange(0, BehaviorContexts.DefaultSquadBehaviors.Num() - 1)];
 	}
 
+	check(DesiredBehavior != nullptr);
 	CurrentBehavior = NewObject<UOxiSquadBehavior>(this, DesiredBehavior);
 	CurrentBehavior->StartBehavior(this);
 }
