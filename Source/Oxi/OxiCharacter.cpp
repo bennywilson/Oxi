@@ -1,7 +1,6 @@
 // ELP 2020
 
 #include "OxiCharacter.h"
-#include "OxiProjectile.h"
 #include "OxiGameMode.h"
 #include "OxiWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -233,6 +232,11 @@ void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickTy
 			FirstPersonCameraComponent->SetWorldRotation(NewActorRot.Rotator(), false, nullptr, ETeleportType::None);
 		}
 	}
+
+	if (IsFireDown)
+	{
+		StartFireWeapon(FirstPersonCameraComponent);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -248,8 +252,8 @@ void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AOxiFirstPersonCharacter::OnFire);
-
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AOxiFirstPersonCharacter::OnStartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AOxiFirstPersonCharacter::OnStopFire);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AOxiFirstPersonCharacter::MoveForward);
@@ -264,9 +268,15 @@ void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiFirstPersonCharacter::LookUpAtRate);
 }
 
-void AOxiFirstPersonCharacter::OnFire()
+void AOxiFirstPersonCharacter::OnStartFire()
 {
 	StartFireWeapon(FirstPersonCameraComponent);
+	IsFireDown = true;
+}
+
+void AOxiFirstPersonCharacter::OnStopFire()
+{
+	IsFireDown = false;
 }
 
 void AOxiFirstPersonCharacter::MoveForward(float Value)

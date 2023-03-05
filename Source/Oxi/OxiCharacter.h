@@ -118,7 +118,9 @@ public:
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 protected:
-	void OnFire();
+	void OnStartFire();
+	void OnStopFire();
+
 	void MoveForward(float Val);
 	void MoveRight(float Val);
 	void TurnAtRate(float Rate);
@@ -211,4 +213,7 @@ private:
 	FRotator StartRotation;
 	FRotator TargetRotation;
 	bool ShouldRotateTowardsTarget;
+
+	UPROPERTY(Transient)
+	bool IsFireDown;
 };
