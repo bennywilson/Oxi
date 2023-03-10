@@ -82,4 +82,7 @@ private:
 
 	UPROPERTY(Transient)
 	class AOxiSquad* Squad;
+
+	UPROPERTY(Transient)
+	bool HasFired;
 };

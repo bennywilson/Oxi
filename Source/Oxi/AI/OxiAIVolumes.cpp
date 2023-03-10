@@ -68,11 +68,18 @@ AOxiAISquadMemberSpawn::AOxiAISquadMemberSpawn(const FObjectInitializer& ObjectI
  */
 void AOxiAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
 {
+	if (HasFired)
+	{ 
+		return;
+	}
+
 	AOxiFirstPersonCharacter* const Player = Cast <AOxiFirstPersonCharacter>(Other);
 	if (Other == nullptr)
 	{
 		return;
 	}
+
+	HasFired = true;
 
 	ActivateSpawnSquadTrigger();
 }
