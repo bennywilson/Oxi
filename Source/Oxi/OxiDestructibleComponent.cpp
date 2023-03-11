@@ -148,6 +148,12 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 
 			for (FBodyInstance* BI : DestructibleMeshComponent->Bodies)
 			{
+				if (BI->GetBodySetup()->CollisionReponse == EBodyCollisionResponse::BodyCollision_Disabled)
+				{
+					BI->SetPhysicsDisabled(true);
+					continue;
+				}
+
 				const float XYImpulse = FMath::RandRange(ExplosionXYImpulseMin, ExplosionXYImpulseMax);
 				const FVector XAmount = XYImpulse * DestructibleMeshComponent->GetComponentTransform().TransformFVector4(FVector4(1.0f, 0.0f, 0.0f, 1.0f));
 				const FVector YAmount = XYImpulse * DestructibleMeshComponent->GetComponentTransform().TransformFVector4(FVector4(0.0f, 1.0f, 0.0f));
