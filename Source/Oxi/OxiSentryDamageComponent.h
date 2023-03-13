@@ -48,5 +48,5 @@ protected:
 
 	// IOxiDamageInterface
 protected:
-	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) override;
+	virtual float TakeDamage(const FOxiDamageInfo& DamageInfo) override;
 };

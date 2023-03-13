@@ -61,7 +61,9 @@ void AOxiCover::BeginPlay()
 	
 	DestructibleComponent->InitDestructibleComponent(UndamagedMesh, DamagedMesh);
 
-	DestructibleComponent->OnTakeDamageDelegate.AddUObject(this, &AOxiCover::OnDestructibleTakeDamage);
+	TakeDamageDelegate.BindUFunction(this, FName("OnDestructibleTakeDamage"));
+	DestructibleComponent->OnDestructibleKilled.Add(TakeDamageDelegate);
+
 	CoverIndex = GetOxiAIManager(this)->RegisterCover(this);
 
 	for (int i = 0; i < CoverSpotList.Num(); i++)
@@ -88,7 +90,7 @@ void AOxiCover::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		AIMgr->UnregisterCover(this);
 	}
-	DestructibleComponent->OnTakeDamageDelegate.RemoveAll(this);
+	DestructibleComponent->OnTakeDamage.RemoveAll(this);
 }
 
 /**

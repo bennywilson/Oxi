@@ -5,7 +5,7 @@
 #include "OxiDamageComponent.h"
 #include "OxiDestructibleComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTakeDamage, class AActor* const, float);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTakeDamage, class AActor* const, damageCauser, float, damageAmount);
 
 UENUM(BlueprintType)
 enum EOxiDestructibleType
@@ -23,7 +23,8 @@ public:
 	// Sets default values for this actor's properties
 	UOxiDestructibleComponent();
 
-	FOnTakeDamage OnTakeDamageDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnTakeDamage OnDestructibleKilled;
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,7 +40,7 @@ public:
 	int GetNumBrokenPieces() const { return NumBrokenPieces; }
 
 private:
-	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) override;
+	virtual float TakeDamage(const FOxiDamageInfo& DamageInfo) override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Oxi Damage")

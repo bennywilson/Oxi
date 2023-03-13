@@ -48,9 +48,11 @@ void UOxiDamageComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}*/
 }
 
-void UOxiDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
+float UOxiDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
 	TakeDamage_Internal(DamageInfo);
+
+	return 0.0f;
 }
 
 void UOxiDamageComponent::DisableRagdoll()

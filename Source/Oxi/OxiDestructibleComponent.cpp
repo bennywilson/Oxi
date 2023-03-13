@@ -36,14 +36,32 @@ bool UOxiDestructibleComponent::InitDestructibleComponent(UStaticMeshComponent* 
 	if (BaseMeshComponent != nullptr)
 	{
 		BaseMeshComponent->SetHiddenInGame(false, true);
-	}
 
-	if (DestructibleMeshComponent != nullptr)
+		if (DestructibleMeshComponent != nullptr)
+		{
+			DestructibleMeshComponent->SetHiddenInGame(true, true);
+			DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
+	}
+	else
 	{
-		DestructibleMeshComponent->SetHiddenInGame(true, true);
-		DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (DestructibleMeshComponent != nullptr)
+		{
+			DestructibleMeshComponent->SetHiddenInGame(false);
+			DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			DestructibleMeshComponent->SetSimulatePhysics(true);
+			DestructibleMeshComponent->SetAllBodiesSimulatePhysics(false);
+		}
+
 	}
 
+	if (DestructibleMeshComponent == nullptr)
+	{
+		static int breakhere = 0;
+		breakhere++;
+	}
+	
 	return true;
 }
 
@@ -75,7 +93,7 @@ void UOxiDestructibleComponent::TickComponent(float DeltaTime, enum ELevelTick T
 /**
  *
  */
-float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
 	const float OldHealth = Health;
 	Health -= DamageInfo.DamageAmount;
@@ -83,13 +101,20 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 	// Swap Meshes
 	if (OldHealth > ThresholdToShowDamagedMeshAt && Health <= FMath::Max(0.0f, ThresholdToShowDamagedMeshAt) && DestructibleMeshComponent != nullptr)
 	{
-		BaseMeshComponent->SetHiddenInGame(true);
-		BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		BaseMeshComponent->SetGenerateOverlapEvents(false);
-		DestructibleMeshComponent->SetHiddenInGame(false);
-		DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		DestructibleMeshComponent->SetSimulatePhysics(true);
-		DestructibleMeshComponent->SetAllBodiesSimulatePhysics(false);
+		if (BaseMeshComponent != nullptr)
+		{ 
+			BaseMeshComponent->SetHiddenInGame(true);
+			BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			BaseMeshComponent->SetGenerateOverlapEvents(false);
+		}
+
+		if (DestructibleMeshComponent != nullptr)
+		{
+			DestructibleMeshComponent->SetHiddenInGame(false);
+			DestructibleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			DestructibleMeshComponent->SetSimulatePhysics(true);
+			DestructibleMeshComponent->SetAllBodiesSimulatePhysics(false);
+		}
 	}
 
 	// Knock individual bodies off
@@ -127,6 +152,8 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 
 	if (OldHealth > 0.0f && Health <= 0.0f)
 	{
+		OnDestructibleKilled.Broadcast(DamageInfo.DamageCauser, DamageInfo.DamageAmount);
+
 		if (ExplosionSound != nullptr)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetComponentTransform().GetLocation());
@@ -226,8 +253,6 @@ float UOxiDestructibleComponent::TakeDamage_Internal(const FOxiDamageInfo& Damag
 				}
 			}
 		}
-
-		OnTakeDamageDelegate.Broadcast(DamageInfo.DamageCauser, DamageInfo.DamageAmount);
 	}
 
 	return 1.0f;

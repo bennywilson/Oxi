@@ -108,6 +108,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	UFUNCTION()
 	void OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount);
 
 public:
@@ -142,4 +143,6 @@ private:
 	TArray<AOxiCharacter*> CurrentUsers;
 
 	uint32 CoverIndex;
+
+	FScriptDelegate TakeDamageDelegate;
 };

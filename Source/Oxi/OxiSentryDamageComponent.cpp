@@ -99,7 +99,7 @@ void UOxiSentryDamageComponent::TickComponent(float DeltaTime, enum ELevelTick T
 }
 
 
-float UOxiSentryDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+float UOxiSentryDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {/*
 	Super::TakeDamage_Internal(DamageInfo);
 	

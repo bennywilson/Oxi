@@ -41,9 +41,9 @@ void UOxiHumanDamageComponent::BeginPlay()
 /**
  *
  */
-float UOxiHumanDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+float UOxiHumanDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
-	Super::TakeDamage_Internal(DamageInfo);
+	Super::TakeDamage(DamageInfo);
 
 UE_LOG(LogTemp, Log, TEXT("Hit Bone %s"), *DamageInfo.HitBoneName.ToString());
 
@@ -292,7 +292,7 @@ void UOxiPlayerDamageComponent::BeginPlay()
 /**
  *
  */
-float UOxiPlayerDamageComponent::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
+float UOxiPlayerDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
 	if (CVarGodMode.GetValueOnGameThread() > 0)
 	{

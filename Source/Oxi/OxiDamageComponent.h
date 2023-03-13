@@ -131,7 +131,10 @@ public:
 	void DisableRagdoll();
 
 	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
-	virtual void TakeDamage(const FOxiDamageInfo& DamageInfo);
+	virtual float TakeDamage(const FOxiDamageInfo& DamageInfo);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Oxi Character")
+	float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo);
 
 	bool IsAlive() const { return CurrentHealth > 0; }
 
@@ -142,8 +145,6 @@ protected:
 	void BroadcastDeath();
 
 protected:
-	
-	virtual float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo) { return 0.0f; }
 
 	TArray<USkeletalMeshComponent*>& GetSkeletalMeshes() { return SkeletalMeshes; }
 
