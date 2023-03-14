@@ -39,6 +39,9 @@ public:
 
 	int GetNumBrokenPieces() const { return NumBrokenPieces; }
 
+	UFUNCTION(BlueprintCallable, Category = "Oxi Damage")
+	void DisablePhysicsOnBodies(const TArray<int>& BodyList, bool shouldEnableResponse);
+
 private:
 	virtual float TakeDamage(const FOxiDamageInfo& DamageInfo) override;
 
@@ -114,6 +117,8 @@ protected:
 
 	UPROPERTY(Transient)
 	int NumBrokenPieces;
+
+	TArray<int> BodiesToSkip;
 
 	float ExplosionLightTargetIntensity;
 

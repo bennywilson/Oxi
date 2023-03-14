@@ -173,9 +173,26 @@ float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 
 			const FVector ExplosionLocation = DestructibleMeshComponent->GetSocketLocation("ExplosionLocation");
 
-			for (FBodyInstance* BI : DestructibleMeshComponent->Bodies)
+			for (int iBodies = 0; iBodies < DestructibleMeshComponent->Bodies.Num(); iBodies++)
 			{
+				FBodyInstance* BI = DestructibleMeshComponent->Bodies[iBodies];
 				if (BI->GetBodySetup()->CollisionReponse == EBodyCollisionResponse::BodyCollision_Disabled)
+				{
+					BI->SetPhysicsDisabled(true);
+					continue;
+				}
+
+				bool bSkipBody = false;
+				for (int i = 0; i < BodiesToSkip.Num(); i++)
+				{
+					if (BodiesToSkip[i] == iBodies)
+					{
+						bSkipBody = true;
+						break;
+					}
+			
+				}
+				if (bSkipBody)
 				{
 					BI->SetPhysicsDisabled(true);
 					continue;
@@ -256,4 +273,12 @@ float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 	}
 
 	return 1.0f;
+}
+
+/**
+ *
+ */
+void UOxiDestructibleComponent::DisablePhysicsOnBodies(const TArray<int>& BodyList, bool shouldDisable)
+{
+	BodiesToSkip = BodyList;
 }
