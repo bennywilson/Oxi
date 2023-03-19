@@ -9,6 +9,8 @@
 #include "GameFramework/PhysicsVolume.h"
 #include "OxiAIVolumes.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSquadSpawned, class AOxiCharacter* const, character);
+
 /**
  * 
  */
@@ -85,4 +87,7 @@ private:
 
 	UPROPERTY(Transient)
 	bool HasFired;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSquadSpawned OnSquadSpawned;
 };

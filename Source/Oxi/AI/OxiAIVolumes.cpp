@@ -142,4 +142,6 @@ void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
 
 		Squad->AddSquadMember(OxiChar);
 	}
+
+	OnSquadSpawned.Broadcast(nullptr);
 }

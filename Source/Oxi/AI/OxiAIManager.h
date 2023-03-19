@@ -25,6 +25,7 @@ enum class EOxiAICommand : uint8
 	FlankTarget,
 	HoldPosition,
 	Strafe,
+	Idle,
 };
 
 /**
