@@ -33,6 +33,8 @@ void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 {
 	check(SquadMemberToAdd);
 
+	SquadMemberToAdd->SetSquad(this);
+
 	UOxiHumanDamageComponent* const DamageComp = Cast<UOxiHumanDamageComponent>(SquadMemberToAdd->GetComponentByClass(UOxiHumanDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
 	{
@@ -103,6 +105,15 @@ void AOxiSquad::Tick(float DeltaTime)
 		{
 			TickAttackState(DeltaTime);
 			break;
+		}
+	}
+
+	const double curTimeSec = GetWorld()->GetTimeSeconds();
+	for (int i = RunningVO.Num() - 1; i >= 0; i--)
+	{
+		if (curTimeSec > RunningVO[i].StartTime + 5.0f)
+		{
+			RunningVO.RemoveAt(i);
 		}
 	}
 
@@ -310,4 +321,46 @@ void UOxiSquadBehavior::GetOutermostSquadMembers(TArray<int>& outCharacters, TAr
 
 	outRightVec.Add(FVector(squadToFocusRightVec.X, squadToFocusRightVec.Y, 0.0f));
 	outRightVec.Add(FVector(-squadToFocusRightVec.X, -squadToFocusRightVec.Y, 0.0f));
+}
+
+/**
+ *
+ */
+bool AOxiSquad::PlaySquadMemberVO(class AOxiAICharacter* const squadMember, EOxiVOType VOType, USoundAttenuation* const soundAttenuation)
+{
+	check(squadMember != nullptr);
+
+	TArray<FOxiVOData*> availableVO;
+	TArray<FOxiVOData>& squadVO = squadMember->GetVOData();
+	for (int i = 0; i < squadVO.Num(); i++)
+	{
+		if (squadVO[i].VOType == VOType)
+		{
+			availableVO.Add(&squadVO[i]);
+		}
+	}
+
+	if (availableVO.Num() == 0)
+	{
+		return false;
+	}
+
+	const double currentTimeSeconds = GetWorld()->GetTimeSeconds();
+
+	for (int i = 0; i < RunningVO.Num(); i++)
+	{
+		if (currentTimeSeconds < RunningVO[i].StartTime + 5.f)
+		{
+			return false;
+		}
+	}
+
+	FOxiVOData selectedVO = *availableVO[rand() % availableVO.Num()];
+	selectedVO.StartTime = currentTimeSeconds;
+	RunningVO.Add(selectedVO);
+
+	FVector someVec(ForceInitToZero);
+	UGameplayStatics::SpawnSoundAttached(selectedVO.SoundWave, squadMember->GetRootComponent(), EName(), someVec, (FRotator)FRotator::ZeroRotator, (EAttachLocation::Type)EAttachLocation::KeepRelativeOffset, true, 1.0f, 1.0f, 0.0f, soundAttenuation, nullptr, true);
+
+	return true;
 }

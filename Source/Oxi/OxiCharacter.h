@@ -10,6 +10,39 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OxiCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EOxiVOType : uint8
+{
+	EnemyDiscovered,
+	BattleChatter,
+	BattleCommand,
+};
+
+USTRUCT(BlueprintType)
+struct FOxiVOData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EOxiVOType VOType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundWave* SoundWave;
+
+	float StartTime;
+};
+
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class EOxiSquadState : uint8
+{
+	Idle,
+	Patrol,
+	Attack
+};
+
 /**
  * 
  */
@@ -59,6 +92,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void SetSquad(const class AOxiSquad* newSquad) { Squad = newSquad; }
+	void SetVOData(const TArray<FOxiVOData>& inVO) { VOData = inVO; }
+
+	TArray<FOxiVOData>& GetVOData() { return VOData; }
+
 	UFUNCTION(BlueprintCallable)
 	bool AcquireCover(AOxiCover* const Cover, FVector threatLocation);
 
@@ -89,6 +127,12 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	const UOxiCoverSpotComponent* CurrentCoverSpot;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	const AOxiSquad* Squad;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FOxiVOData> VOData;
 
 private:
 

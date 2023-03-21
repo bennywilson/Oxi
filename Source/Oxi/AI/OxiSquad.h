@@ -8,16 +8,6 @@
 
 #include "OxiSquad.generated.h"
 
-/**
- *
- */
-UENUM(BlueprintType)
-enum class EOxiSquadState : uint8
-{
-	Idle,
-	Patrol,
-	Attack
-};
 
 /**
  *
@@ -101,6 +91,10 @@ public:
 	void GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers);
 
 	void ApplyBehaviorOverrides(const FOxiSquadBehaviorContexts& overrides) { BehaviorContexts.ApplyOverrides(overrides); }
+
+	UFUNCTION(BlueprintCallable)
+	bool PlaySquadMemberVO(class AOxiAICharacter* const squadMember, EOxiVOType VOType, USoundAttenuation* const soundAttenuation);
+
 private:
 	void SquadMemberKilledCB(UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer);
 	void EnterAttackState();
@@ -134,6 +128,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	UOxiSquadBehavior* CurrentBehavior;
+
+private:
+	TArray<FOxiVOData> RunningVO;
 };
 
 /**
