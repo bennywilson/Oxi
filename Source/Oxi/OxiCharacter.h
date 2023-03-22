@@ -16,7 +16,9 @@ enum class EOxiVOType : uint8
 	EnemyDiscovered,
 	BattleChatter,
 	BattleCommand,
-	NeighborhoodCallout
+	NeighborhoodCallout,
+	Reloading,
+	Hurt,
 };
 
 USTRUCT(BlueprintType)

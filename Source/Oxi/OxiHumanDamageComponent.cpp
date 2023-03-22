@@ -251,6 +251,10 @@ UE_LOG(LogTemp, Log, TEXT("Hit Bone %s"), *DamageInfo.HitBoneName.ToString());
 	{
 		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
+	else
+	{
+		OnTakeDamage.Broadcast(GetOwner(), DamageInfo);
+	}
 	return 0.f;
 }
 
@@ -311,7 +315,7 @@ float UOxiPlayerDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 		OnDeath.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
 	}
 
-	OnTakeDamage.Broadcast(this, GetOwner(), DamageInfo.DamageCauser);
+	OnTakeDamage.Broadcast(GetOwner(), DamageInfo);
 
 	LastDamageTime = GetWorld()->GetTimeSeconds();
 	return 0.0f;

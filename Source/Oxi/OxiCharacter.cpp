@@ -180,7 +180,8 @@ void AOxiFirstPersonCharacter::BeginPlay()
 	UOxiDamageComponent* const DamageComp = Cast<UOxiDamageComponent>(GetComponentByClass(UOxiDamageComponent::StaticClass()));
 	if (DamageComp != nullptr)
 	{
-		DamageComp->OnTakeDamage.AddUObject(this, &AOxiFirstPersonCharacter::DamageTakenCB);
+		//DamageComp->OnTakeDamage.Add()
+//AddUObject(this, &AOxiFirstPersonCharacter::DamageTakenCB);
 	}
 }
 
