@@ -70,6 +70,54 @@ void AOxiSquad::BeginPlay()
 /**
  *
  */
+void AOxiSquad::StartSquadActions()
+{
+	if (BehaviorContexts.DefaultSquadBehaviors.Num() == 0)
+	{
+		return;
+	}
+
+	SquadState = EOxiSquadState::Attack;
+
+	UOxiAIManager* AIMgr = GetOxiAIManager(this);
+	TArray<AOxiFirstPersonCharacter*> PlayerList = AIMgr->GetPlayerList();
+	if (PlayerList.Num() == 0)
+	{
+		return;
+	}
+
+	AOxiFirstPersonCharacter* const Player = PlayerList[0];
+	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+	{
+		AOxiCharacter* const SquadMember = CurrentSquadMembers[i];
+		{
+			SquadTargets.Empty();
+			FOxiSquadTarget NewTarget;
+			NewTarget.Character = Player;
+			NewTarget.Location = Player->GetActorLocation();
+			SquadTargets.Add(NewTarget);
+		}
+	}
+
+
+	TSubclassOf<UOxiSquadBehavior> DesiredBehavior;
+	if (DebugBehavior.Get() != nullptr)
+	{
+		DesiredBehavior = DebugBehavior;
+	}
+	else
+	{
+		DesiredBehavior = BehaviorContexts.DefaultSquadBehaviors[FMath::RandRange(0, BehaviorContexts.DefaultSquadBehaviors.Num() - 1)];
+	}
+
+	check(DesiredBehavior != nullptr);
+	CurrentBehavior = NewObject<UOxiSquadBehavior>(this, DesiredBehavior);
+	CurrentBehavior->StartBehavior(this);
+}
+
+/**
+ *
+ */
 void AOxiSquad::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -170,26 +218,6 @@ void AOxiSquad::EnterAttackState()
 {
 	check(SquadTargets.Num() > 0);
 
-	if (BehaviorContexts.DefaultSquadBehaviors.Num() == 0)
-	{
-		return;
-	}
-
-	SquadState = EOxiSquadState::Attack;
-
-	TSubclassOf<UOxiSquadBehavior> DesiredBehavior;
-	if (DebugBehavior.Get() != nullptr)
-	{
-		DesiredBehavior = DebugBehavior;
-	}
-	else
-	{
-		DesiredBehavior = BehaviorContexts.DefaultSquadBehaviors[FMath::RandRange(0, BehaviorContexts.DefaultSquadBehaviors.Num() - 1)];
-	}
-
-	check(DesiredBehavior != nullptr);
-	CurrentBehavior = NewObject<UOxiSquadBehavior>(this, DesiredBehavior);
-	CurrentBehavior->StartBehavior(this);
 }
 
 /**
@@ -346,21 +374,41 @@ bool AOxiSquad::PlaySquadMemberVO(class AOxiAICharacter* const squadMember, EOxi
 	}
 
 	const double currentTimeSeconds = GetWorld()->GetTimeSeconds();
+	float delayBetween = 5.0f;
+	if (VOType == EOxiVOType::Hurt)
+	{
+		delayBetween = 3.0f;
+	}
 
 	for (int i = 0; i < RunningVO.Num(); i++)
 	{
-		if (currentTimeSeconds < RunningVO[i].StartTime + 5.f)
+		if (currentTimeSeconds < RunningVO[i].StartTime + delayBetween)
 		{
 			return false;
 		}
 	}
 
-	FOxiVOData selectedVO = *availableVO[rand() % availableVO.Num()];
-	selectedVO.StartTime = currentTimeSeconds;
-	RunningVO.Add(selectedVO);
+	while (availableVO.Num())
+	{
+		const int randIdx = rand() % availableVO.Num();
+		FOxiVOData selectedVO = *availableVO[randIdx];
+		availableVO.RemoveAt(randIdx);
+		if (selectedVO.StartTime == 0.0f || selectedVO.StartTime > GetWorld()->GetTimeSeconds() + 10.0f)
+		{
+			selectedVO.StartTime = currentTimeSeconds;
+			RunningVO.Add(selectedVO);
 
-	FVector someVec(ForceInitToZero);
-	UGameplayStatics::SpawnSoundAttached(selectedVO.SoundWave, squadMember->GetRootComponent(), EName(), someVec, (FRotator)FRotator::ZeroRotator, (EAttachLocation::Type)EAttachLocation::KeepRelativeOffset, true, 1.0f, 1.0f, 0.0f, soundAttenuation, nullptr, true);
+			FVector someVec(ForceInitToZero);
+			UGameplayStatics::SpawnSoundAttached(selectedVO.SoundWave, squadMember->GetRootComponent(), EName(), someVec, (FRotator)FRotator::ZeroRotator, (EAttachLocation::Type)EAttachLocation::KeepRelativeOffset, true, 1.0f, 1.0f, 0.0f, soundAttenuation, nullptr, true);
+
+			break;
+		}
+
+		if (availableVO.Num() == 0)
+		{
+			return false;
+		}
+	}
 
 	return true;
 }

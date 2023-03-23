@@ -80,6 +80,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void ApplyBehaviorOverrides(const FOxiSquadBehaviorContexts& overrides) { BehaviorContexts.ApplyOverrides(overrides); }
+
+	void StartSquadActions();
+
 	virtual void Tick(float DeltaTime) override;
 
 	void AddSquadMember(AOxiCharacter* const SquadMember);
@@ -89,8 +93,6 @@ public:
 
 	const TArray<AOxiCharacter*>& GetSquadMembers() const { return CurrentSquadMembers; }
 	void GetAliveSquadMembers(TArray<AOxiCharacter*>& outSquadMembers);
-
-	void ApplyBehaviorOverrides(const FOxiSquadBehaviorContexts& overrides) { BehaviorContexts.ApplyOverrides(overrides); }
 
 	UFUNCTION(BlueprintCallable)
 	bool PlaySquadMemberVO(class AOxiAICharacter* const squadMember, EOxiVOType VOType, USoundAttenuation* const soundAttenuation);
