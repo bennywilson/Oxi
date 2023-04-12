@@ -83,3 +83,4 @@ hooks/post-checkout
 *.blend1
 
 enc_temp_folder/*
+SourceAssets/HighPolySculpts/*
