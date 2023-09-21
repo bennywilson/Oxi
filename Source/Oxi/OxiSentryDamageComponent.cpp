@@ -100,7 +100,7 @@ void UOxiSentryDamageComponent::TickComponent(float DeltaTime, enum ELevelTick T
 
 
 float UOxiSentryDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
-{/*
+{
 	Super::TakeDamage_Internal(DamageInfo);
 	
 	float DamageAmount = DamageInfo.DamageAmount;
@@ -260,7 +260,7 @@ float UOxiSentryDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 				AnimInstance->PlayHitReaction(DamageInfo.DamageAmount, DamageInfo.DamageLocation, DamageInfo.DamageCauser, bCanClipBone, bBoneClipped);
 			}
 		}
-	}*/
+	}
 	return 0.f;
 }
 
