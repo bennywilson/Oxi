@@ -15,14 +15,14 @@ public:
 	// Sets default values for this actor's properties
 	AOxiCheckpoint();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void ReloadCheckpoint(ACharacter* const Player);
 
 protected:
+	UPROPERTY(EditAnywhere)
+	TArray<class ATriggerBox*> TriggersToActivateOnReload;
 
+#if WITH_EDITORONLY_DATA
+	UPROPERTY()
+	TObjectPtr<UBillboardComponent> SpriteComponent;
+#endif // WITH_EDITORONLY_DATA
 };

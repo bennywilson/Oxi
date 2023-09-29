@@ -12,15 +12,14 @@ void UOxiCheatManager::WarpToCheckPoint(FString CheckpointName)
 {
 	for (TActorIterator<AOxiCheckpoint> It(GetWorld()); It; ++It)
 	{
-		if (It->GetHumanReadableName() == CheckpointName)
+		if (It->GetActorNameOrLabel() == CheckpointName)
 		{
 			ACharacter* const PlayerChar = UGameplayStatics::GetPlayerCharacter(this, 0);
 			if (PlayerChar == nullptr)
 			{
 				return;
 			}
-
-			PlayerChar->SetActorLocation(It->GetActorLocation());
+			It->ReloadCheckpoint(PlayerChar);
 			break;
 		}
 	}

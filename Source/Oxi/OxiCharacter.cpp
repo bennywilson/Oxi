@@ -11,6 +11,7 @@
 #include "Components/LightComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "AI/OxiAIManager.h"
+#include "OxiCheatManager.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -389,4 +390,9 @@ void AOxiFirstPersonCharacter::ChangeOxiPlayerState(OxiPlayerState InPlayerState
 		GetController()->SetIgnoreLookInput(false);
 		FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	}
+}
+
+AOxiPlayerController::AOxiPlayerController()
+{
+	CheatClass = UOxiCheatManager::StaticClass();
 }

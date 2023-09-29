@@ -47,7 +47,7 @@ AOxiGameMode::AOxiGameMode()
 
 	// use our custom HUD class
 	HUDClass = AOxiHUD::StaticClass();
-
+	this->PlayerControllerClass = AOxiPlayerController::StaticClass();
 	//if (GIsPlayInEditorWorld || GIsEditor == false)
 	{
 		CombatManager = CreateDefaultSubobject<UCombatManager>(TEXT("CombatManager"));

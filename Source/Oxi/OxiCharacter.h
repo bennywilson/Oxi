@@ -264,3 +264,14 @@ private:
 	UPROPERTY(Transient)
 	bool IsFireDown;
 };
+
+/**
+ *
+ */
+UCLASS(BlueprintType, Blueprintable)
+class AOxiPlayerController : public APlayerController
+{
+	GENERATED_BODY()
+
+	AOxiPlayerController();
+};

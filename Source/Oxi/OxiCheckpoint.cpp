@@ -2,25 +2,75 @@
 
 #include "OxiCheckpoint.h"
 
+#include "GameFramework/Character.h"
+#include "Engine/TriggerBox.h"
+#include "Components/BillboardComponent.h"
+
+/**
+ *
+ */
 AOxiCheckpoint::AOxiCheckpoint()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	USceneComponent* RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(RootComponent);
+
+#if WITH_EDITORONLY_DATA
+	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
+	if (!IsRunningCommandlet())
+	{
+		// Structure to hold one-time initialization
+		struct FConstructorStatics
+		{
+			ConstructorHelpers::FObjectFinderOptional<UTexture2D> SpriteTexture;
+			FName ID_Name;
+			FText Name_Name;
+			FConstructorStatics()
+				: SpriteTexture(TEXT("/Game/Oxi/Editor/S_Checkpoint"))
+				, ID_Name(TEXT("SpawnSquad"))
+				, Name_Name(NSLOCTEXT("SpriteCategory", "OxiAISpawnSquad", "OxiAISpawnSquads"))
+			{
+			}
+		};
+		static FConstructorStatics ConstructorStatics;
+
+		if (SpriteComponent)
+		{
+			SpriteComponent->Sprite = ConstructorStatics.SpriteTexture.Get();
+			SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+			SpriteComponent->SpriteInfo.Category = ConstructorStatics.ID_Name;
+			SpriteComponent->SpriteInfo.DisplayName = ConstructorStatics.Name_Name;
+			SpriteComponent->SetupAttachment(RootComponent);
+			SpriteComponent->bIsScreenSizeScaled = true;
+			SpriteComponent->SetUsingAbsoluteScale(true);
+			SpriteComponent->bReceivesDecals = false;
+		}
+	}
+#endif
 }
 
-// Called when the game starts or when spawned
-void AOxiCheckpoint::BeginPlay()
+/**
+ *
+ */ 
+void AOxiCheckpoint::ReloadCheckpoint(ACharacter* const Player)
 {
-	Super::BeginPlay();
-	
+	if (Player == nullptr)
+	{
+		return;
+	}
+
+	Player->SetActorLocationAndRotation(GetActorLocation(), GetActorRotation());
+	Player->GetLocalViewingPlayerController()->SetControlRotation(GetActorRotation());
+
+	for (ATriggerBox* Trigger : TriggersToActivateOnReload)
+	{
+		if (Trigger == nullptr)
+		{
+			continue;
+		}
+
+		Trigger->OnActorBeginOverlap.Broadcast(Trigger, Player);
+		Trigger->OnActorEndOverlap.Broadcast(Trigger, Player);
+	}
 }
-
-// Called every frame
-void AOxiCheckpoint::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
