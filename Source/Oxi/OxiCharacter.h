@@ -116,6 +116,9 @@ public:
 
 	const TMap<FName, float> GetHitBoneToDamageMultiplier() const { return HitBoneToDamageMultiplier; }
 
+	UFUNCTION(BlueprintCallable)
+	void SetOxiCharacterBase(UPrimitiveComponent* NewBase, const FName BoneName = NAME_None, bool bNotifyActor = true) { SetBase(NewBase, BoneName, bNotifyActor); }
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDeath_Internal(UOxiDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
