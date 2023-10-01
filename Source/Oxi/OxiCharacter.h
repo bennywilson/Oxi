@@ -190,7 +190,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
 	OxiPlayerState GetOxiPlayerState() const { return PlayerState; }
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	AOxiWeapon* EquippedItem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
