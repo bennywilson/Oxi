@@ -55,7 +55,7 @@ class OXI_API UOxiAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Oxi Anim")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Oxi Anim")
 	TMap<FName, UAnimSequence*> AnimSequenceMap;
 };
 
