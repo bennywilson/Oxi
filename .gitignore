@@ -84,3 +84,5 @@ hooks/post-checkout
 
 enc_temp_folder/*
 SourceAssets/HighPolySculpts/*
+
+!Binaries/Win64/UnrealEditor-Oxi.dll
