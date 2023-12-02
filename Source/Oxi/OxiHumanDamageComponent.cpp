@@ -45,8 +45,6 @@ float UOxiHumanDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
 	Super::TakeDamage(DamageInfo);
 
-UE_LOG(LogTemp, Log, TEXT("Hit Bone %s"), *DamageInfo.HitBoneName.ToString());
-
 	float DamageAmount = DamageInfo.DamageAmount;
 	AOxiCharacter* Victim = Cast<AOxiCharacter>(GetOwner());
 	if (Victim != nullptr)
