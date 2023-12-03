@@ -175,7 +175,7 @@ void AOxiSquad::Tick(float DeltaTime)
 				const FOxiSquadTarget& curSquadTarget = SquadTargets[i];
 				const FMatrix debugMatrix(FVector::UpVector, FVector::ForwardVector, FVector::LeftVector, curSquadTarget.Location);
 
-				DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
+			//	DrawDebugSolidCircle(GetWorld(), debugMatrix, TargetsPositionRadius, 36, FColor(255, 0, 0, 64), false, -1.0f, SDPG_World);
 			}
 		}
 	}
