@@ -133,7 +133,12 @@ void AOxiCover::RemoveUser(AOxiCharacter* const UserToRemove)
  */
 void AOxiCover::OnDestructibleTakeDamage(AActor* const DamageCauser, float DamageAmount)
 {
-	if (DestructibleComponent->GetNumBrokenPieces() == -1)
+	if (ProtectionLevel == EOxiCoverProtectionLevel::Unbreakable)
+	{
+		return;
+	}
+
+	if (ProtectionLevel != EOxiCoverProtectionLevel::Broken)
 	{
 		ProtectionLevel = EOxiCoverProtectionLevel::Broken;
 		OnProtectionLevelChanged.Broadcast(this, EOxiCoverProtectionLevel::Broken);
