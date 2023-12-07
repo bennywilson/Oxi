@@ -358,6 +358,11 @@ bool AOxiSquad::PlaySquadMemberVO(class AOxiAICharacter* const squadMember, EOxi
 {
 	check(squadMember != nullptr);
 
+	if (SuppressVO)
+	{
+		return false;
+	}
+
 	TArray<FOxiVOData*> availableVO;
 	TArray<FOxiVOData>& squadVO = squadMember->GetVOData();
 	for (int i = 0; i < squadVO.Num(); i++)

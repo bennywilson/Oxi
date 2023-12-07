@@ -119,6 +119,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float TargetsPositionRadius;
 
+	UPROPERTY(EditAnywhere)
+	bool SuppressVO;
+
 	UPROPERTY(BlueprintReadOnly, Transient)
 	TArray<FOxiSquadTarget> SquadTargets;
 

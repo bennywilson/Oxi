@@ -111,7 +111,7 @@ void AOxiCover::Tick(float DeltaTime)
 bool AOxiCover::AddUser(AOxiCharacter* const NewUser)
 {
 	// Only one user per cover for now
-	check(CurrentUsers.Num() == 0);
+	//ensure(CurrentUsers.Num() == 0);
 	
 	CurrentUsers.Add(NewUser);
 	OnProtectionLevelChanged.AddUObject(NewUser, &AOxiCharacter::OnCoverProtectionLevelChanged);
