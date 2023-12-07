@@ -122,11 +122,11 @@ void AOxiSquad::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
+/*	for (int i = 0; i < CurrentSquadMembers.Num(); i++)
 	{
 		GWorld->DestroyActor(CurrentSquadMembers[i]);
 	}
-
+*/
 	CurrentSquadMembers.Empty();
 
 	UOxiAIManager* AIMgr = GetOxiAIManager(this);

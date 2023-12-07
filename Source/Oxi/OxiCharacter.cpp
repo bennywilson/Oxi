@@ -79,6 +79,17 @@ void AOxiCharacter::OnDeath(UOxiDamageComponent* const DamageComp, AActor* const
 	DamageComp->OnDeath.RemoveAll(this);
 
 	ReleaseCover();
+
+	FTimerHandle TearDownTimerHandle;
+	GetOwner()->GetWorldTimerManager().SetTimer(TearDownTimerHandle, this, &AOxiCharacter::DestroyCharacter, 10.0f, false);
+}
+
+/**
+ *
+ */
+void AOxiCharacter::DestroyCharacter()
+{
+
 }
 
 /**

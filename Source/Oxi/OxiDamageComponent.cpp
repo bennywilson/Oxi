@@ -57,11 +57,13 @@ float UOxiDamageComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 
 void UOxiDamageComponent::DisableRagdoll()
 {
-	for (int i = 0; i < SkeletalMeshes.Num(); i++)
+	/*for (int i = 0; i < SkeletalMeshes.Num(); i++)
 	{
 		USkeletalMeshComponent* const SkelMesh = SkeletalMeshes[i];
 		SkelMesh->PutAllRigidBodiesToSleep();
-	}
+	}*/
+
+	GetOwner()->SetActorHiddenInGame(true);
 
 	GetOwner()->GetWorldTimerManager().ClearTimer(RagdollSleepTimerHandle);
 }

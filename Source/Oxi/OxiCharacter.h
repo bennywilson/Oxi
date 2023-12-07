@@ -123,6 +123,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDeath_Internal(UOxiDamageComponent* DamageComp, AActor* Victim, AActor* Killer);
 
+	void DestroyCharacter();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FName, float> HitBoneToDamageMultiplier;
