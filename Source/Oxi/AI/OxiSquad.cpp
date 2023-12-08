@@ -31,7 +31,10 @@ AOxiSquad::AOxiSquad()
  */
 void AOxiSquad::AddSquadMember(AOxiCharacter* const SquadMemberToAdd)
 {
-	check(SquadMemberToAdd);
+	if (ensure(SquadMemberToAdd) == false)
+	{
+		return;
+	}
 
 	SquadMemberToAdd->SetSquad(this);
 

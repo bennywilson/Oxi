@@ -63,18 +63,23 @@ class OXI_API AOxiAISpawnSquadTrigger : public APhysicsVolume
 {
 	GENERATED_BODY()
 	
+	AOxiAISpawnSquadTrigger();
+
 	virtual void ActorEnteredVolume(class AActor* Other) override;
 
 	UFUNCTION(BlueprintCallable)
 	void ActivateSpawnSquadTrigger();
 
-private:
+protected:
 
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<AOxiSquad>> SquadTypes;
 
 	UPROPERTY(EditAnywhere)
 	TArray<AOxiAISquadMemberSpawn*> SquadMembersToSpawn;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	TArray<AOxiAICharacter*> PosedSquadMembersToSpawn;
 
 	UPROPERTY()
 	EAISpawnSquadTriggerCondition SpawnCondition;

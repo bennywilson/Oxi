@@ -64,6 +64,14 @@ AOxiAISquadMemberSpawn::AOxiAISquadMemberSpawn(const FObjectInitializer& ObjectI
 }
 
 /**
+ *
+ */
+AOxiAISpawnSquadTrigger::AOxiAISpawnSquadTrigger()
+{
+	this->GetRootComponent()->Bounds.SphereRadius = 1.0f;
+}
+
+/**
  * 
  */
 void AOxiAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
@@ -100,7 +108,7 @@ void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
 		return;
 	}*/
 
-	if (SquadMembersToSpawn.Num() == 0)
+	if (SquadMembersToSpawn.Num() == 0 && PosedSquadMembersToSpawn.Num() == 0)
 	{
 		UE_LOG(LogOxiAI, Warning, TEXT("AAISpawnSquadTrigger::ActorEnteredVolume() - Volume %s has no squad members to spawn"), *GetFullName());
 		return;
@@ -139,6 +147,11 @@ void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
 		check(OxiChar != nullptr);
 
 		Squad->AddSquadMember(OxiChar);
+	}
+
+	for (AOxiAICharacter* const Char : PosedSquadMembersToSpawn)
+	{
+		Squad->AddSquadMember(Char);
 	}
 
 	Squad->ApplyBehaviorOverrides(BehaviorOverrides);
