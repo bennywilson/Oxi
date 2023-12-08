@@ -84,3 +84,6 @@ hooks/post-checkout
 
 enc_temp_folder/*
 SourceAssets/HighPolySculpts/*
+
+Intermediate
+Saved

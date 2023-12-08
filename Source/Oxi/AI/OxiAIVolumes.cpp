@@ -95,10 +95,10 @@ void AOxiAISpawnSquadTrigger::ActivateSpawnSquadTrigger()
 		return;
 	}
 
-	if (Squad != nullptr && Squad->GetNumAliveSquadMembers() > 0)
+	/*if (Squad != nullptr && Squad->GetNumAliveSquadMembers() > 0)
 	{
 		return;
-	}
+	}*/
 
 	if (SquadMembersToSpawn.Num() == 0)
 	{
