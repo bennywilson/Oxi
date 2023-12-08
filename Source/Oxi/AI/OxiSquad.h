@@ -86,6 +86,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
 	void AddSquadMember(AOxiCharacter* const SquadMember);
 
 	int GetNumSquadMembers() const { return CurrentSquadMembers.Num(); }
