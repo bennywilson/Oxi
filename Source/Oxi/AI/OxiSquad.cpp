@@ -241,7 +241,11 @@ void AOxiSquad::TickAttackState(const float DeltaTime)
 		}
 	}
 
-	check(CurrentBehavior != nullptr);
+	if (ensure(CurrentBehavior != nullptr) == false)
+	{
+		return;
+	}
+
 	CurrentBehavior->TickBehavior(DeltaTime);
 }
 
