@@ -10,5 +10,6 @@ public class OxiTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		ExtraModuleNames.Add("Oxi");
+        Name = "OxiEditor"
 	}
 }
