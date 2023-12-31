@@ -87,3 +87,7 @@ SourceAssets/HighPolySculpts/*
 
 Intermediate
 Saved
+
+UE5_PLA
+*.zip
+!Binaries/Win64/*

@@ -10,7 +10,7 @@ Manual Instructions:
 
 2. Extract this in the same folder this ReadMe file is in
 
-3. Run the OxiEditor.bat batch file found in this directory
+3. Run the RunOxiEditor.bat batch file found in this directory
 
 4. When the Editor opens up, browse to and select
 
