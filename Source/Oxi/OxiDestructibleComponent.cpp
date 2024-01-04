@@ -185,7 +185,7 @@ float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 				bool bSkipBody = false;
 				for (int i = 0; i < BodiesToSkip.Num(); i++)
 				{
-					if (BodiesToSkip[i] == iBodies)
+					if (BodiesToSkip[i] == iBodies) 
 					{
 						bSkipBody = true;
 						break;

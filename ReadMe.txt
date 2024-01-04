@@ -8,7 +8,7 @@ Manual Instructions:
 
 1. Download the zipped up engine here: https://www.benny-wilson.com/LivingInAmerica/UE5_PLA.zip
 
-2. Extract this in the same folder this ReadMe file is in
+2. Extract this zip file in the folder containing this ReadMe.
 
 3. Run the RunProjectBrowser.bat batch file found in this directory
 
