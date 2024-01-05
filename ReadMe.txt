@@ -10,8 +10,6 @@ Manual Instructions:
 
 2. Extract this zip file in the folder containing this ReadMe.
 
-3. Run the RunProjectBrowser.bat batch file found in this directory
+3. Right-click on Oxi.uproject -> Choose "Open With" -> "Choose Another App" -> "Choose an App on Your PC" -> then navigate to this file in the File Browser: UE5.0\Engine\Binaries\Win64
 
-4. When the Project Browser opens up, click the "Recent Projects" tab in the left panel then browse to Oxi.uproject
-
-5. Wait until the editor opens!  The editor can take several minutes to open the first time you launch.
+4. Wait until the editor opens!  The editor can take several minutes to open the first time you launch.
