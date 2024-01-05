@@ -6,7 +6,7 @@ Video Instructions Here:  https://youtu.be/uJ_u_f6Ebr4?si=hAZahhSFWilzxtVW
 
 Manual Instructions:
 
-1. Download the zipped up engine here: https://www.benny-wilson.com/LivingInAmerica/UE5_PLA.zip
+1. Download the zipped up engine here: https://www.benny-wilson.com/livinginamerica/UE5.0.zip
 
 2. Extract this zip file in the folder containing this ReadMe.
 
