@@ -216,7 +216,7 @@ protected:
 	class UInputAction* FireAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* MappingContext;
+	class UInputMappingContext* MappingContext;
 
 private:
 	UFUNCTION()

@@ -269,44 +269,22 @@ void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickTy
 void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	if (UEnhancedInputComponent* const EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::Look);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::OnStartFire);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnStartFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::OnStartFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnStopFire);
 
+		// Bind jump events
+	//	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 //		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::Fire);
 	}
 	else
 	{
 //		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
-/*	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	EnableInput(Cast<APlayerController>(GetController()));
-
-	// set up gameplay key bindings
-	check(PlayerInputComponent);
-
-	// Bind jump events
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AOxiFirstPersonCharacter::OnStartFire);
-	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AOxiFirstPersonCharacter::OnStopFire);
-
-	// Bind movement events
-	PlayerInputComponent->BindAxis("MoveForward", this, &AOxiFirstPersonCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AOxiFirstPersonCharacter::MoveRight);
-
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AOxiFirstPersonCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiFirstPersonCharacter::LookUpAtRate);*/
 }
 
 void AOxiFirstPersonCharacter::OnStartFire(const FInputActionValue& Value)
