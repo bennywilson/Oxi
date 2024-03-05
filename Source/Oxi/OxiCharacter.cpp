@@ -8,9 +8,11 @@
 #include "OxiHumanDamageComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Components/LightComponent.h"
 #include "GameFramework/InputSettings.h"
-#include "AI/OxiAIManager.h"
+#include "OxiAIManager.h"
 #include "OxiCheatManager.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -195,6 +197,15 @@ void AOxiFirstPersonCharacter::BeginPlay()
 		//DamageComp->OnTakeDamage.Add()
 //AddUObject(this, &AOxiFirstPersonCharacter::DamageTakenCB);
 	}
+
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(MappingContext, 0);
+		}
+	}
 }
 
 /**
@@ -257,6 +268,23 @@ void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickTy
 
 void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::Look);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::OnStartFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnStartFire);
+
+//		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::Fire);
+	}
+	else
+	{
+//		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+/*	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	EnableInput(Cast<APlayerController>(GetController()));
+
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
 
@@ -278,16 +306,16 @@ void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AOxiFirstPersonCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiFirstPersonCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AOxiFirstPersonCharacter::LookUpAtRate);*/
 }
 
-void AOxiFirstPersonCharacter::OnStartFire()
+void AOxiFirstPersonCharacter::OnStartFire(const FInputActionValue& Value)
 {
 	StartFireWeapon(FirstPersonCameraComponent);
 	IsFireDown = true;
 }
 
-void AOxiFirstPersonCharacter::OnStopFire()
+void AOxiFirstPersonCharacter::OnStopFire(const FInputActionValue& Value)
 {
 	IsFireDown = false;
 }
@@ -403,7 +431,29 @@ void AOxiFirstPersonCharacter::ChangeOxiPlayerState(OxiPlayerState InPlayerState
 	}
 }
 
+void AOxiFirstPersonCharacter::Move(const FInputActionValue& Value)
+{
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+	if (Controller != nullptr)
+	{
+		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
+		AddMovementInput(GetActorRightVector(), MovementVector.X);
+	}
+}
+
+void AOxiFirstPersonCharacter::Look(const struct FInputActionValue& Value)
+{
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
 AOxiPlayerController::AOxiPlayerController()
 {
 	CheatClass = UOxiCheatManager::StaticClass();
 }
+

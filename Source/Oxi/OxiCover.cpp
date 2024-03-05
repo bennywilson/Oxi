@@ -2,7 +2,7 @@
 
 #include "OxiCover.h"
 #include "OxiDestructibleComponent.h"
-#include "AI/OxiAIManager.h"
+#include "OxiAIManager.h"
 
 
 /**

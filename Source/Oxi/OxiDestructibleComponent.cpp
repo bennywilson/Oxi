@@ -95,6 +95,8 @@ void UOxiDestructibleComponent::TickComponent(float DeltaTime, enum ELevelTick T
  */
 float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 {
+
+/*
 	const float OldHealth = Health;
 	Health -= DamageInfo.DamageAmount;
 	
@@ -271,7 +273,7 @@ float UOxiDestructibleComponent::TakeDamage(const FOxiDamageInfo& DamageInfo)
 			}
 		}
 	}
-
+*/
 	return 1.0f;
 }
 

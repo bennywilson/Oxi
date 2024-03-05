@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OxiCharacter.generated.h"
 
+
 UENUM(BlueprintType)
 enum class EOxiVOType : uint8
 {
@@ -170,8 +171,11 @@ public:
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 protected:
-	void OnStartFire();
-	void OnStopFire();
+	void OnStartFire(const struct FInputActionValue& Value);
+	void OnStopFire(const struct FInputActionValue& Value);
+
+	void Move(const struct FInputActionValue& Value);
+	void Look(const struct FInputActionValue& Value);
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
@@ -197,6 +201,22 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
 	TSubclassOf<AOxiWeapon> DefaultWeapon;
+
+protected:
+
+	/** Jump Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
+
+	/** Move Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* MoveAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* MappingContext;
 
 private:
 	UFUNCTION()

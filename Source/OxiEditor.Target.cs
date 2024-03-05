@@ -5,10 +5,11 @@ using System.Collections.Generic;
 
 public class OxiEditorTarget : TargetRules
 {
-	public OxiEditorTarget(TargetInfo Target) : base(Target)
+	public OxiEditorTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.V4;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 		ExtraModuleNames.Add("Oxi");
 	}
 }
