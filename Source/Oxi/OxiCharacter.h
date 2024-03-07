@@ -174,6 +174,8 @@ protected:
 	void OnStartFire(const struct FInputActionValue& Value);
 	void OnStopFire(const struct FInputActionValue& Value);
 
+	void OnInteraction(const struct FInputActionValue& Value);
+
 	void Move(const struct FInputActionValue& Value);
 	void Look(const struct FInputActionValue& Value);
 
@@ -184,10 +186,10 @@ protected:
 
 	virtual void OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	class USkeletalMeshComponent* Mesh1P;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
 	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
@@ -199,55 +201,60 @@ protected:
 	UPROPERTY(Transient, BlueprintReadWrite)
 	AOxiWeapon* EquippedItem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<AOxiWeapon> DefaultWeapon;
 
 protected:
 
 	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
 	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* MappingContext;
+
+	/**Interact Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* InteractAction;
 
 private:
 	UFUNCTION()
 	void OnCharacterDeathEvent(class UOxiDamageComponent* Victim, UOxiDamageComponent* Killer);
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	float BaseTurnRate;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	float BaseLookUpRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
 	FVector GunOffset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
 	float BaseHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
 	FName GripPointName;
 
-	UPROPERTY(BlueprintReadWrite, interp, Category = Light)
+	UPROPERTY(BlueprintReadWrite, interp, Category = "Light")
 	FLinearColor OxiColor;
 
-	UPROPERTY(BlueprintReadWrite, interp, Category = Light)
+	UPROPERTY(BlueprintReadWrite, interp, Category = "Light")
 	FLinearColor BloodColor;
 
-	UPROPERTY(BlueprintReadWrite, interp, Category = Light)
+	UPROPERTY(BlueprintReadWrite, interp, Category = "Light")
 	FLinearColor OxiLightColor;
 
-	UPROPERTY(BlueprintReadWrite, interp, Category = Light)
+	UPROPERTY(BlueprintReadWrite, interp, Category = "Light")
 	FLinearColor BloodLightColor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Oxi Damage")

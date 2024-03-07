@@ -275,6 +275,7 @@ void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOxiFirstPersonCharacter::Look);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::OnStartFire);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnStopFire);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnInteraction);
 
 		// Bind jump events
 	//	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -296,6 +297,44 @@ void AOxiFirstPersonCharacter::OnStartFire(const FInputActionValue& Value)
 void AOxiFirstPersonCharacter::OnStopFire(const FInputActionValue& Value)
 {
 	IsFireDown = false;
+}
+
+void AOxiFirstPersonCharacter::OnInteraction(const FInputActionValue& Value)
+{
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+
+	AActor* MyOwner = GetOwner();
+
+	FVector EyeLocation;
+	FRotator EyeRotation;
+
+	MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+
+	FVector End = EyeLocation + (EyeRotation.Vector() * 300);
+
+	TArray<FHitResult> Hits;
+	float Radius = 30.0f;
+	FCollisionShape Shape;
+	Shape.SetSphere(Radius);
+	/*bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape); //Don't forget to comment out the line trace
+	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+	for (FHitResult Hit : Hits)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor)
+		{
+			if (HitActor->Implements<USGameplayInterface>())//Include interface
+			{
+				APawn* MyPawn = Cast<APawn>(MyOwner); //Cast as Pawn because Execute_Interact needs a Pawn and not an Actor
+				ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
+				break;//Break out of for loop instead of returning
+			}
+		}
+		//Debugging
+		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
+		GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
+		*/
 }
 
 void AOxiFirstPersonCharacter::MoveForward(float Value)
