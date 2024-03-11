@@ -317,7 +317,7 @@ void AOxiFirstPersonCharacter::OnInteraction(const FInputActionValue& Value)
 	float Radius = 30.0f;
 	FCollisionShape Shape;
 	Shape.SetSphere(Radius);
-	/*bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape); //Don't forget to comment out the line trace
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape); //Don't forget to comment out the line trace
 	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
 	for (FHitResult Hit : Hits)
 	{
@@ -334,7 +334,7 @@ void AOxiFirstPersonCharacter::OnInteraction(const FInputActionValue& Value)
 		//Debugging
 		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
 		GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
-		*/
+		
 }
 
 void AOxiFirstPersonCharacter::MoveForward(float Value)
