@@ -12,6 +12,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/LightComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "SGameplayInterface.h"
 #include "OxiAIManager.h"
 #include "OxiCheatManager.h"
 
@@ -334,7 +335,7 @@ void AOxiFirstPersonCharacter::OnInteraction(const FInputActionValue& Value)
 		//Debugging
 		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
 		GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
-		
+	}
 }
 
 void AOxiFirstPersonCharacter::MoveForward(float Value)
