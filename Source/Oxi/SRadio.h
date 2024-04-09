@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class USoundWave;
+class UAudioComponent;
 
 UCLASS()
 class OXI_API ASRadio : public AActor, public ISGameplayInterface
@@ -30,6 +31,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<USoundWave*> SoundWaves;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAudioComponent* AudioComp;
 
 	UPROPERTY(EditDefaultsOnly)
 	int Counter;
