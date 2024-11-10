@@ -24,6 +24,13 @@ TAutoConsoleVariable<int32> CVarCoverSpotDebug(
 	ECVF_Cheat
 );
 
+TAutoConsoleVariable<int32> CVarEnableAI(
+	TEXT("oxi.enableai"),
+	0,
+	TEXT("AI will stop spawning if this flag is enabled"),
+	ECVF_Cheat
+);
+
 /**
  *
  */

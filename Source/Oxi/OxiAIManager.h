@@ -12,6 +12,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogOxiAI, Warning, All);
 
 extern TAutoConsoleVariable<int32> CVarCoverDebug;
 extern TAutoConsoleVariable<int32> CVarCoverSpotDebug;
+extern TAutoConsoleVariable<int32> CVarEnableAI;
 
 /**
  *

@@ -76,8 +76,15 @@ AOxiAISpawnSquadTrigger::AOxiAISpawnSquadTrigger()
  */
 void AOxiAISpawnSquadTrigger::ActorEnteredVolume(AActor* Other)
 {
+	const int enableAI = CVarEnableAI.GetValueOnGameThread();
+	if (enableAI == 0)
+	{
+		return;
+	}
+
 	if (HasFired)
 	{ 
+		HasFired = true;
 		return;
 	}
 

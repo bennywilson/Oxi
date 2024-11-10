@@ -279,15 +279,10 @@ void AOxiFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::OnStartFire);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnStopFire);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AOxiFirstPersonCharacter::OnInteraction);
-
-		// Bind jump events
-	//	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	//	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-//		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AOxiFirstPersonCharacter::Fire);
 	}
 	else
 	{
-//		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogTemp, Log, TEXT("AOxiFirstPersonCharacter::SetupPlayerInputComponent() - Failed to create input"));
 	}
 }
 
