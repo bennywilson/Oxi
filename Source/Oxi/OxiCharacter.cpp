@@ -353,16 +353,6 @@ void AOxiFirstPersonCharacter::MoveRight(float Value)
 	}
 }
 
-void AOxiFirstPersonCharacter::TurnAtRate(float Rate)
-{
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AOxiFirstPersonCharacter::LookUpAtRate(float Rate)
-{
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
 float AOxiFirstPersonCharacter::TakeDamage_Internal(const FOxiDamageInfo& DamageInfo)
 {
 	CurrentHealth -= DamageInfo.DamageAmount;
@@ -463,6 +453,7 @@ void AOxiFirstPersonCharacter::Look(const struct FInputActionValue& Value)
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if (Controller != nullptr)
 	{
+	UE_LOG(LogTemp, Log, TEXT("LookAxisVec = %f %f"), LookAxisVector.X, LookAxisVector.Y);
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);

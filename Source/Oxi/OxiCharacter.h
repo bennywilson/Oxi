@@ -181,8 +181,6 @@ protected:
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
-	void TurnAtRate(float Rate);
-	void LookUpAtRate(float Rate);
 
 	virtual void OnDeath(class UOxiDamageComponent* const DamageComp, AActor* const Victim, AActor* const Killer) override;
 
