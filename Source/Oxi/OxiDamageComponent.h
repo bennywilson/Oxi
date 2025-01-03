@@ -139,6 +139,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Oxi Character")
 	float TakeDamage_Internal(const FOxiDamageInfo& DamageInfo);
 
+	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
 	bool IsAlive() const { return CurrentHealth > 0; }
 
 protected:
