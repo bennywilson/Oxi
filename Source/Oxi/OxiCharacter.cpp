@@ -453,10 +453,12 @@ void AOxiFirstPersonCharacter::Look(const struct FInputActionValue& Value)
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if (Controller != nullptr)
 	{
-	UE_LOG(LogTemp, Log, TEXT("LookAxisVec = %f %f"), LookAxisVector.X, LookAxisVector.Y);
+		float X = pow(LookAxisVector.X * 2.5, 3.0);
+		float Y = pow(LookAxisVector.Y * 2.5, 3.0);
+
 		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(X);
+		AddControllerPitchInput(Y);
 	}
 }
 
