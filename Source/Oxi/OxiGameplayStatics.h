@@ -16,4 +16,8 @@ class OXI_API UOxiGameplayStatics : public UBlueprintFunctionLibrary
 	
 	UFUNCTION(BlueprintCallable)
 	static void PrintMessageToConsole(const FString& Msg);
+
+	UFUNCTION(BlueprintCallable)
+	static FRotator WeightedMovingAverage(const FRotator& Cur, const FRotator& prev, const float weight);
+
 };
