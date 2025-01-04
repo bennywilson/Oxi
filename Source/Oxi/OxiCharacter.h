@@ -178,6 +178,7 @@ protected:
 
 	void Move(const struct FInputActionValue& Value);
 	void Look(const struct FInputActionValue& Value);
+	void GamePadLook(const struct FInputActionValue& Value);
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
@@ -204,7 +205,7 @@ protected:
 
 protected:
 
-	/** Jump Input Action */
+	/** Look  Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 

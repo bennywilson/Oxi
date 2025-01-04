@@ -17,12 +17,14 @@ void UOxiGameplayStatics::PrintMessageToConsole(const FString& Msg)
  */
 float NormalizeAngle(const float angle)
 {
-	return fmod(angle + 180.f, 360.f) - 180.f;
+	return fmod(angle, 360.f);
 }
 
-float AngleDelta(const float Cur, const float Prev)
+float AngleDelta(float Cur, float Prev)
 {
-	const float delta = NormalizeAngle(Cur) - NormalizeAngle(Prev);
+	Cur = NormalizeAngle(Cur);
+	Prev = NormalizeAngle(Prev);
+	const float delta = Cur - Prev;
 	if (delta >= 180.f) {
 		return delta - 360.f;
 	} else if (delta < -180.f) {

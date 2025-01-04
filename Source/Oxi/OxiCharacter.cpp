@@ -20,6 +20,20 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
+TAutoConsoleVariable<bool> CVarAutoAim(
+	TEXT("oxi.autoaim.enable"),
+	true,
+	TEXT(""),
+	ECVF_Default
+);
+
+TAutoConsoleVariable<float> CVarAutoAimBlendWeight(
+	TEXT("oxi.autoaim.blendweight"),
+	0.1,
+	TEXT(""),
+	ECVF_Default
+);
+
 void UOxiCharacterMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)
 {
 	Super::RequestDirectMove(MoveVelocity, bForceMaxSpeed);
@@ -449,6 +463,17 @@ void AOxiFirstPersonCharacter::Move(const FInputActionValue& Value)
 }
 
 void AOxiFirstPersonCharacter::Look(const struct FInputActionValue& Value)
+{
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AOxiFirstPersonCharacter::GamePadLook(const struct FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if (Controller != nullptr)
