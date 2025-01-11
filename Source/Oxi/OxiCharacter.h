@@ -191,6 +191,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* SpringArmComponent;
+
 	UFUNCTION(BlueprintCallable, Category = "Oxi Character")
 	void ChangeOxiPlayerState(OxiPlayerState NewPlayerState, FVector InteractionPos, bool MovePlayer, FRotator InteractionRot, bool RotatePlayer);
 
@@ -323,4 +326,6 @@ class AOxiPlayerController : public APlayerController
 	GENERATED_BODY()
 
 	AOxiPlayerController();
+
+	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 };

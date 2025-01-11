@@ -1,24 +1,86 @@
 // ELP 2020
 
 #include "OxiCharacter.h"
-#include "OxiGameMode.h"
-#include "OxiWeapon.h"
-#include "GameFramework/CharacterMovementComponent.h"
+
 #include "Camera/CameraComponent.h"
-#include "OxiHumanDamageComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/LightComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Components/LightComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "Kismet/GameplayStatics.h"
 #include "SGameplayInterface.h"
 #include "OxiAIManager.h"
 #include "OxiCheatManager.h"
-
-#include "Kismet/GameplayStatics.h"
+#include "OxiGameMode.h"
+#include "OxiHumanDamageComponent.h"
+#include "OxiWeapon.h"
+#include <KismetTraceUtils.h>
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
+
+FCollisionQueryParams ConfigureCollisionParams(FName TraceTag, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore, bool bIgnoreSelf, const UObject* WorldContextObject)
+{
+	FCollisionQueryParams Params(TraceTag, SCENE_QUERY_STAT_ONLY(KismetTraceUtils), bTraceComplex);
+	Params.bReturnPhysicalMaterial = true;
+	Params.bReturnFaceIndex = false;
+	Params.AddIgnoredActors(ActorsToIgnore);
+	if (bIgnoreSelf)
+	{
+		const AActor* IgnoreActor = Cast<AActor>(WorldContextObject);
+		if (IgnoreActor)
+		{
+			Params.AddIgnoredActor(IgnoreActor);
+		}
+		else
+		{
+			// find owner
+			const UObject* CurrentObject = WorldContextObject;
+			while (CurrentObject)
+			{
+				CurrentObject = CurrentObject->GetOuter();
+				IgnoreActor = Cast<AActor>(CurrentObject);
+				if (IgnoreActor)
+				{
+					Params.AddIgnoredActor(IgnoreActor);
+					break;
+				}
+			}
+		}
+	}
+
+	return Params;
+}
+
+FCollisionObjectQueryParams ConfigureCollisionObjectParams(const TArray<TEnumAsByte<EObjectTypeQuery> >& ObjectTypes)
+{
+	TArray<TEnumAsByte<ECollisionChannel>> CollisionObjectTraces;
+	CollisionObjectTraces.AddUninitialized(ObjectTypes.Num());
+
+	for (auto Iter = ObjectTypes.CreateConstIterator(); Iter; ++Iter)
+	{
+		CollisionObjectTraces[Iter.GetIndex()] = UEngineTypes::ConvertToCollisionChannel(*Iter);
+	}
+
+	FCollisionObjectQueryParams ObjectParams;
+	for (auto Iter = CollisionObjectTraces.CreateConstIterator(); Iter; ++Iter)
+	{
+		const ECollisionChannel& Channel = (*Iter);
+		if (FCollisionObjectQueryParams::IsValidObjectQuery(Channel))
+		{
+			ObjectParams.AddObjectTypesToQuery(Channel);
+		}
+		else
+		{
+			UE_LOG(LogBlueprintUserMessages, Warning, TEXT("%d isn't valid object type"), (int32)Channel);
+		}
+	}
+
+	return ObjectParams;
+}
 
 TAutoConsoleVariable<bool> CVarAutoAim(
 	TEXT("oxi.autoaim.enable"),
@@ -159,12 +221,17 @@ AOxiFirstPersonCharacter::AOxiFirstPersonCharacter()
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArmComponent->SetupAttachment(FirstPersonCameraComponent);
+	SpringArmComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f)); // Position the camera
+	SpringArmComponent->bUsePawnControlRotation = true;
+
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
-	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
+	Mesh1P->SetupAttachment(SpringArmComponent);
 	Mesh1P->bCastDynamicShadow = false;
-	Mesh1P->CastShadow = false;	
+	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
 
@@ -276,6 +343,14 @@ void AOxiFirstPersonCharacter::TickActor(float DeltaTime, enum ELevelTick TickTy
 	{
 		StartFireWeapon(FirstPersonCameraComponent);
 	}
+
+	//
+	FRotator rot = this->GetController()->K2_GetActorRotation();
+	rot.Yaw += 0.1;
+	const FQuat CurActorRot = FQuat(GetActorRotation());
+	const FQuat NewActorRot = FQuat(GetActorRotation() + FRotator(0.0, 1.0, 0.0));
+	this->GetController()->K2_SetActorRotation(rot, false);
+//	FirstPersonCameraComponent->SetWorldRotation(NewActorRot., false, nullptr, ETeleportType::None);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -490,4 +565,32 @@ void AOxiFirstPersonCharacter::GamePadLook(const struct FInputActionValue& Value
 AOxiPlayerController::AOxiPlayerController()
 {
 	CheatClass = UOxiCheatManager::StaticClass();
+}
+
+void AOxiPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)  {
+	if (IsLookInputIgnored())
+	{
+		// zero look inputs
+		RotationInput = FRotator::ZeroRotator;
+	}
+	
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Push(GetPawn());
+
+	TArray<TEnumAsByte<EObjectTypeQuery> > QueryTypes;
+	QueryTypes.Push(EObjectTypeQuery::ObjectTypeQuery1);
+	QueryTypes.Push(EObjectTypeQuery::ObjectTypeQuery7);
+
+	FCollisionObjectQueryParams ObjectParams = ConfigureCollisionObjectParams(QueryTypes);//(ECC_WorldStatic | ECC_GameTraceChannel1 | ECC_GameTraceChannel2);
+	static const FName LineTraceSingleName(TEXT("LineTraceSingleForObjects"));
+	FCollisionQueryParams Params = ConfigureCollisionParams(LineTraceSingleName, false, ActorsToIgnore, true, GetWorld());
+	
+	FVector EyePos;
+	FRotator EyeRot;
+	this->GetActorEyesViewPoint(EyePos, EyeRot);
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByObjectType(HitResult, EyePos, EyePos + EyeRot.Vector() * 5555.f,  ObjectParams, Params);
+	if (HitResult.bBlockingHit == true) {
+		UE_LOG(LogTemp, Log, TEXT("Hit Actor %s"), *HitResult.GetActor()->GetFullName());
+	}
 }
