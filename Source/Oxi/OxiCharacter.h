@@ -327,5 +327,5 @@ class AOxiPlayerController : public APlayerController
 
 	AOxiPlayerController();
 
-	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
+	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 };
