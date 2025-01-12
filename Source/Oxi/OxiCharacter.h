@@ -328,4 +328,7 @@ class AOxiPlayerController : public APlayerController
 	AOxiPlayerController();
 
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
+
+private:
+	void UpdateAutoAim(const float DT);
 };

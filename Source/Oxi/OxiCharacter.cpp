@@ -570,57 +570,57 @@ AOxiPlayerController::AOxiPlayerController()
 void AOxiPlayerController::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
+	UpdateAutoAim(DeltaTime);
+}
+
+void AOxiPlayerController::UpdateAutoAim(const float DT)
+{
 	static const FName LineTraceSingleName(TEXT("OxiAutoAimTrace_1"));
-	const FCollisionObjectQueryParams ObjectParams = ConfigureCollisionObjectParams({ EObjectTypeQuery::ObjectTypeQuery1, EObjectTypeQuery::ObjectTypeQuery7 });
-	FCollisionQueryParams Params = ConfigureCollisionParams(LineTraceSingleName, false, { this->GetPawn() }, true, GetWorld());
+	const FCollisionObjectQueryParams ObjectQueryParams = ConfigureCollisionObjectParams({ EObjectTypeQuery::ObjectTypeQuery1, EObjectTypeQuery::ObjectTypeQuery7 });
+	const FCollisionQueryParams QueryParams = ConfigureCollisionParams(LineTraceSingleName, false, { this->GetPawn() }, true, GetWorld());
 
-	FVector EyePos;
-	FRotator EyeRot;
-	this->GetActorEyesViewPoint(EyePos, EyeRot);
+	const FVector TraceStart = PlayerCameraManager->GetCameraLocation();
+	const FVector TraceDir = PlayerCameraManager->GetCameraRotation().Vector();
+	const FVector TraceEnd = TraceStart + TraceDir * 5555.f;
 
-	FVector EyeDir = EyeRot.Vector();
-	FVector EndTrace = EyePos + EyeDir * 5555.f;
+	// Trace for auto aim collision
 	FHitResult HitResult;
-	GetWorld()->LineTraceSingleByObjectType(HitResult, EyePos, EndTrace, ObjectParams, Params);
+	GetWorld()->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, QueryParams);
 	if (!HitResult.bBlockingHit) {
 		return;
 	}
 
-	const AOxiAICharacter* const Enemy = Cast< AOxiAICharacter>(HitResult.GetActor());
+	const AOxiAICharacter* const Enemy = Cast<AOxiAICharacter>(HitResult.GetActor());
 	if (Enemy == nullptr) {
 		return;
 	}
-/*
+
 	HitResult.Init();
-	GetWorld()->LineTraceSingleByChannel(HitResult, EyePos, EndTrace, ECC_Visibility, Params);
-	if (!HitResult.bBlockingHit) {
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+	if (HitResult.bBlockingHit && HitResult.BoneName != NAME_None) {
+		// Stop auto-aiming if aiming at enemies physics body
 		return;
 	}
-*/
 
-
+	const FName TargetBones[] = { "Spine_003", "Spine_006" };
 	double ClosestAngle = 99999.0;
 	FVector ClosestBoneVec;
 
-	const FName TargetBones[] = { "Spine_003", "Spine_006" };
-	for (auto Bone: TargetBones)
+	for (auto Bone : TargetBones)
 	{
 		const FVector HitPos = Enemy->GetMesh()->GetBoneLocation(Bone);
-		const FVector EyeToHit = (HitPos - EyePos).GetSafeNormal();
-		const double AngleBetween = acos(EyeDir.Dot(EyeToHit));
+		const FVector EyeToHit = (HitPos - TraceStart).GetSafeNormal();
+		const double AngleBetween = acos(TraceDir.Dot(EyeToHit));
 		if (AngleBetween < ClosestAngle)
 		{
 			ClosestAngle = AngleBetween;
 			ClosestBoneVec = EyeToHit;
 		}
-	} 
+	}
 
-	const double LERP_ALPHA = 0.01;
-//	UE_LOG(LogTemp, Log, TEXT("--> %s"), *HitResult.GetActor()->GetFullName());
+	const double InterpSpeed = 0.165;
 	FRotator CameraRot = ((AOxiFirstPersonCharacter*)GetPawn())->GetFirstPersonCameraComponent()->GetComponentRotation();
-	//FRotator TargetROtator = 
-	FRotator FinalLerp = CameraRot + LERP_ALPHA * (ClosestBoneVec.ToOrientationRotator() - CameraRot);
-
+	FRotator FinalLerp = FMath::RInterpConstantTo(CameraRot, ClosestBoneVec.ToOrientationRotator(), DT, InterpSpeed);
 	SetControlRotation(FinalLerp);
-	//GetPawn()->FaceRotation(GetPawnRot + FRotator(0.0, 1.0, 0.0));
+
 }
