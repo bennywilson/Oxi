@@ -22,7 +22,29 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
-FCollisionQueryParams ConfigureCollisionParams(FName TraceTag, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore, bool bIgnoreSelf, const UObject* WorldContextObject)
+TAutoConsoleVariable<bool> CVarAutoAim(
+	TEXT("oxi.autoaim.enable"),
+	true,
+	TEXT(""),
+	ECVF_Default
+);
+
+TAutoConsoleVariable<float> CVarAutoAimInterpSpeed(
+	TEXT("oxi.autoaim.interpspeed"),
+	2.0,
+	TEXT(""),
+	ECVF_Default
+);
+
+TAutoConsoleVariable<float> CVarAutoAimCheckDistance(
+	TEXT("oxi.autoaim.checkdistance"),
+	2000.,
+	TEXT(""),
+	ECVF_Default
+);
+
+// Copied from ConfigureCollisionParams
+FCollisionQueryParams Oxi_ConfigureCollisionParams(FName TraceTag, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore, bool bIgnoreSelf, const UObject* WorldContextObject)
 {
 	FCollisionQueryParams Params(TraceTag, SCENE_QUERY_STAT_ONLY(KismetTraceUtils), bTraceComplex);
 	Params.bReturnPhysicalMaterial = true;
@@ -55,7 +77,7 @@ FCollisionQueryParams ConfigureCollisionParams(FName TraceTag, bool bTraceComple
 	return Params;
 }
 
-FCollisionObjectQueryParams ConfigureCollisionObjectParams(const TArray<TEnumAsByte<EObjectTypeQuery> >& ObjectTypes)
+FCollisionObjectQueryParams Oxi_ConfigureCollisionObjectParams(const TArray<TEnumAsByte<EObjectTypeQuery> >& ObjectTypes)
 {
 	TArray<TEnumAsByte<ECollisionChannel>> CollisionObjectTraces;
 	CollisionObjectTraces.AddUninitialized(ObjectTypes.Num());
@@ -81,20 +103,6 @@ FCollisionObjectQueryParams ConfigureCollisionObjectParams(const TArray<TEnumAsB
 
 	return ObjectParams;
 }
-
-TAutoConsoleVariable<bool> CVarAutoAim(
-	TEXT("oxi.autoaim.enable"),
-	true,
-	TEXT(""),
-	ECVF_Default
-);
-
-TAutoConsoleVariable<float> CVarAutoAimBlendWeight(
-	TEXT("oxi.autoaim.blendweight"),
-	0.1,
-	TEXT(""),
-	ECVF_Default
-);
 
 void UOxiCharacterMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)
 {
@@ -575,13 +583,20 @@ void AOxiPlayerController::TickActor(float DeltaTime, enum ELevelTick TickType, 
 
 void AOxiPlayerController::UpdateAutoAim(const float DT)
 {
+	if (CVarAutoAim.GetValueOnGameThread() == false) {
+		return;
+	}
+
+	const double InterpSpeed = CVarAutoAimInterpSpeed.GetValueOnGameThread();
+	const double AutoAimCheckDist = CVarAutoAimCheckDistance.GetValueOnGameThread();
+
 	static const FName LineTraceSingleName(TEXT("OxiAutoAimTrace_1"));
-	const FCollisionObjectQueryParams ObjectQueryParams = ConfigureCollisionObjectParams({ EObjectTypeQuery::ObjectTypeQuery1, EObjectTypeQuery::ObjectTypeQuery7 });
-	const FCollisionQueryParams QueryParams = ConfigureCollisionParams(LineTraceSingleName, false, { this->GetPawn() }, true, GetWorld());
+	const FCollisionObjectQueryParams ObjectQueryParams = Oxi_ConfigureCollisionObjectParams({ EObjectTypeQuery::ObjectTypeQuery1, EObjectTypeQuery::ObjectTypeQuery7 });
+	const FCollisionQueryParams QueryParams = Oxi_ConfigureCollisionParams(LineTraceSingleName, false, { this->GetPawn() }, true, GetWorld());
 
 	const FVector TraceStart = PlayerCameraManager->GetCameraLocation();
 	const FVector TraceDir = PlayerCameraManager->GetCameraRotation().Vector();
-	const FVector TraceEnd = TraceStart + TraceDir * 5555.f;
+	const FVector TraceEnd = TraceStart + TraceDir * AutoAimCheckDist;
 
 	// Trace for auto aim collision
 	FHitResult HitResult;
@@ -595,19 +610,27 @@ void AOxiPlayerController::UpdateAutoAim(const float DT)
 		return;
 	}
 
-	HitResult.Init();
+	/*HitResult.Init();
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
 	if (HitResult.bBlockingHit && HitResult.BoneName != NAME_None) {
 		// Stop auto-aiming if aiming at enemies physics body
 		return;
 	}
-
-	const FName TargetBones[] = { "Spine_003", "Spine_006" };
+*/
+	static const AOxiAICharacter* PrevEnemy = Enemy;
+	
+	const FName TargetBones[] = { "Spine_001", "Spine_006" };
 	double ClosestAngle = 99999.0;
 	FVector ClosestBoneVec;
-
-	for (auto Bone : TargetBones)
+	static int target = 0;
+//	for (auto Bone : TargetBones)
 	{
+		auto Bone = TargetBones[target%2];
+
+		if (PrevEnemy != Enemy) {
+			PrevEnemy = Enemy;
+			target++;
+		}
 		const FVector HitPos = Enemy->GetMesh()->GetBoneLocation(Bone);
 		const FVector EyeToHit = (HitPos - TraceStart).GetSafeNormal();
 		const double AngleBetween = acos(TraceDir.Dot(EyeToHit));
@@ -618,7 +641,6 @@ void AOxiPlayerController::UpdateAutoAim(const float DT)
 		}
 	}
 
-	const double InterpSpeed = 0.165;
 	FRotator CameraRot = ((AOxiFirstPersonCharacter*)GetPawn())->GetFirstPersonCameraComponent()->GetComponentRotation();
 	FRotator FinalLerp = FMath::RInterpConstantTo(CameraRot, ClosestBoneVec.ToOrientationRotator(), DT, InterpSpeed);
 	SetControlRotation(FinalLerp);
