@@ -43,6 +43,32 @@ TAutoConsoleVariable<float> CVarAutoAimCheckDistance(
 	ECVF_Default
 );
 
+TAutoConsoleVariable<float> CVarAutoAimX(
+	TEXT("auto_aim_x"),
+	0.,
+	TEXT(""),
+	ECVF_Default
+);
+TAutoConsoleVariable<float> CVarAutoAimY(
+	TEXT("auto_aim_y"),
+	0.,
+	TEXT(""),
+	ECVF_Default
+);
+TAutoConsoleVariable<float> CVarAutoAimZ(
+	TEXT("auto_aim_z"),
+	0.,
+	TEXT(""),
+	ECVF_Default
+);
+TAutoConsoleVariable<float> CVarAutoAimYaw(
+	TEXT("auto_aim_yaw"),
+	0.,
+	TEXT(""),
+	ECVF_Default
+);
+
+
 // Copied from ConfigureCollisionParams
 FCollisionQueryParams Oxi_ConfigureCollisionParams(FName TraceTag, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore, bool bIgnoreSelf, const UObject* WorldContextObject)
 {
